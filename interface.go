@@ -10,10 +10,12 @@ var (
 	serializerInterface   = reflect.TypeOf((*Serializer)(nil)).Elem()
 )
 
+// Deserializer allows you to implement a custom deserialization strategy for a type
 type Deserializer interface {
 	Deserialize(r io.Reader) error
 }
 
+// Serializer allows you to implement a custom serialization strategy for a type
 type Serializer interface {
 	Serialize(w io.Writer) error
 }

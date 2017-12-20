@@ -7,6 +7,7 @@ Originally this package was made as an extension to binary.Read and binary.Write
 #### Features
 * Caches types for faster calls to the same type
 * Compression support
+* Tread safe (the calls are, reading to the value is not)
 
 #### Format
 * All primitives are stored in big endian format

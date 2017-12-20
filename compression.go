@@ -26,11 +26,8 @@ func (c *compressionReadWriter) read(r io.Reader, v reflect.Value) error {
 
 	z := flate.NewReader(bytes.NewBuffer(cb))
 	defer z.Close()
-	if err := handleVariableReader(z, c.handler, v); err != nil {
-		return err
-	}
 
-	return nil
+	return handleVariableReader(z, c.handler, v)
 }
 
 func (c *compressionReadWriter) write(w io.Writer, v reflect.Value) error {
