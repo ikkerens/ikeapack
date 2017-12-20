@@ -18,6 +18,24 @@ func getStructHandlerFromType(t reflect.Type) *typeHandler {
 		return infoV.(*typeHandler)
 	}
 	info := new(typeHandler)
+	r := info
+
+	interfaceTest := reflect.New(t).Type()
+	var (
+		hasDeserializer = interfaceTest.Implements(deserializerInterface)
+		hasSerializer   = interfaceTest.Implements(serializerInterface)
+	)
+	if hasDeserializer && hasSerializer {
+		return &typeHandler{
+			length:  -1,
+			handler: &customReadWriter{nil},
+		}
+	} else if hasDeserializer || hasSerializer {
+		r = &typeHandler{
+			length:  -1,
+			handler: &customReadWriter{info},
+		}
+	}
 
 	handlers := make([]*typeHandler, 0)
 
@@ -45,17 +63,9 @@ func getStructHandlerFromType(t reflect.Type) *typeHandler {
 		info.handler = &variableStructReadWriter{handlers: handlers}
 	}
 
-	testT := reflect.New(t).Type()
-	if testT.Implements(deserializerInterface) || testT.Implements(serializerInterface) {
-		info = &typeHandler{
-			length:  -1,
-			handler: &customReadWriter{info},
-		}
-	}
-
 	structIndex.Store(t.String(), info)
 
-	return info
+	return r
 }
 
 type fixedStructReadWriter struct {
