@@ -1,4 +1,4 @@
-# Go packed serializer
+# Go packed serializer [![Build Status](https://travis-ci.org/Ikkerens/serialize.svg?branch=master)](https://travis-ci.org/Ikkerens/serialize) [![Go Report Card](https://goreportcard.com/badge/github.com/Ikkerens/serialize)](https://goreportcard.com/report/github.com/Ikkerens/serialize) [![GoDoc](https://godoc.org/github.com/Ikkerens/serialize?status.svg)](https://godoc.org/github.com/Ikkerens/serialize)
 
 This is a packed struct serializer that is mostly meant for a private project but was released as it may be useful to someone else.
 
@@ -8,9 +8,62 @@ Originally this package was made as an extension to binary.Read and binary.Write
 * Caches types for faster calls to the same type
 * Compression support
 * Tread safe (the calls are, reading to the value is not)
+* Supported types:
+  * uint8 (byte) up to uint64
+  * int8 up to int64
+  * float32 and float64
+  * string
+  * structs containing any of the above
+  * slices containing any of the above
+  * anything implementing the Serializer/Deserializer interfaces
 
 #### Format
 * All primitives are stored in big endian format
 * All slices are stored with a uint32 prefix indicating their length
 * Strings are stored with a uint32 prefix indicating their length
 * Compression blocks are stored using deflate (level 9) with a uint32 prefixing the size of the compressed data blob
+
+## Include in your project
+```go
+import "github.com/ikkerens/serialize"
+```
+
+## Usage
+```go
+package main
+
+import (
+	"bytes"
+	"log"
+
+	"github.com/ikkerens/serialize"
+)
+
+type myBlob struct {
+	A uint64 // all fields have to be exported
+	B []byte `compressed:"true"` // this field will be serialized compressed, can be added anywhere
+	C subBlob
+}
+
+type subBlob struct {
+	D string
+}
+
+func main() {
+	b := new(bytes.Buffer)
+	blob := &myBlob{A: 1, B: []byte{1, 2, 3, 4}, C: subBlob{D: "test message"}}
+
+	// Serialize
+	if err := serialize.Write(b, blob); err != nil { // Write does not need a pointer, but it is recommended
+		log.Fatalln(err)
+	}
+
+	// Deserialize
+	newBlob := new(myBlob)
+	if err := serialize.Read(b, newBlob); err != nil { // Read *needs* a pointer, or it will panic
+		log.Fatalln(err)
+	}
+
+	log.Printf("Succesfully deserialized: %+v", newBlob)
+}
+```
