@@ -8,17 +8,13 @@ import (
 
 var structIndex = sync.Map{}
 
-func getStructHandlerFromType(t reflect.Type) *typeHandler {
-	if t.Kind() != reflect.Struct {
-		panic("passed value is not a struct")
-	}
-
+func getStructHandlerFromType(t reflect.Type) readWriter {
 	infoV, found := structIndex.Load(t.String())
 	if found {
-		return infoV.(*typeHandler)
+		return infoV.(readWriter)
 	}
-	info := new(typeHandler)
-	r := info
+
+	var ret readWriter
 
 	interfaceTest := reflect.New(t).Type()
 	var (
@@ -26,70 +22,75 @@ func getStructHandlerFromType(t reflect.Type) *typeHandler {
 		hasSerializer   = interfaceTest.Implements(serializerInterface)
 	)
 	if hasDeserializer && hasSerializer {
-		return &typeHandler{
-			length:  -1,
-			handler: &customReadWriter{nil},
-		}
+		ret = &customReadWriter{nil}
 	} else if hasDeserializer || hasSerializer {
-		r = &typeHandler{
-			length:  -1,
-			handler: &customReadWriter{info},
-		}
+		ret = &customReadWriter{scanStruct(t)}
+	} else {
+		ret = scanStruct(t)
 	}
 
-	handlers := make([]*typeHandler, 0)
+	structIndex.Store(t.String(), ret)
+	return ret
+}
 
+func scanStruct(t reflect.Type) readWriter {
+	handlers := make([]readWriter, 0)
+
+	length := 0
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
 		typ := field.Type
 		h := getTypeHandler(typ)
 
-		if h.length == -1 {
-			info.length = -1
-		} else if info.length != -1 {
-			info.length += h.length
+		if f, ok := h.(fixedReadWriter); ok && length != -1 {
+			length += f.length()
+		} else {
+			length = -1
 		}
 
 		if value, ok := field.Tag.Lookup("compressed"); ok && value == "true" {
-			h = makeCompressionHandler(h)
+			h = &compressionReadWriter{h}
 		}
 
 		handlers = append(handlers, h)
 	}
 
-	if info.length != -1 {
-		info.handler = &fixedStructReadWriter{handlers: handlers}
+	if length != -1 {
+		return &fixedStructReadWriter{length, handlers}
 	} else {
-		info.handler = &variableStructReadWriter{handlers: handlers}
+		return &variableStructReadWriter{handlers}
 	}
-
-	structIndex.Store(t.String(), info)
-
-	return r
 }
 
 type fixedStructReadWriter struct {
-	handlers []*typeHandler
+	size     int
+	handlers []readWriter
+}
+
+func (s *fixedStructReadWriter) length() int {
+	return s.size
 }
 
 func (s *fixedStructReadWriter) read(data []byte, v reflect.Value) {
 	read := 0
 	for i, handler := range s.handlers {
-		handler.handler.(fixedReadWriter).read(data[read:read+handler.length], v.Field(i))
-		read += handler.length
+		r := handler.(fixedReadWriter)
+		r.read(data[read:read+r.length()], v.Field(i))
+		read += r.length()
 	}
 }
 
 func (s *fixedStructReadWriter) write(data []byte, v reflect.Value) {
 	written := 0
 	for i, handler := range s.handlers {
-		handler.handler.(fixedReadWriter).write(data[written:written+handler.length], v.Field(i))
-		written += handler.length
+		w := handler.(fixedReadWriter)
+		w.write(data[written:written+w.length()], v.Field(i))
+		written += w.length()
 	}
 }
 
 type variableStructReadWriter struct {
-	handlers []*typeHandler
+	handlers []readWriter
 }
 
 func (h *variableStructReadWriter) read(r io.Reader, v reflect.Value) error {

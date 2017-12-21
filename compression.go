@@ -9,7 +9,7 @@ import (
 )
 
 type compressionReadWriter struct {
-	handler *typeHandler
+	handler readWriter
 }
 
 func (c *compressionReadWriter) read(r io.Reader, v reflect.Value) error {
@@ -53,11 +53,4 @@ func (c *compressionReadWriter) write(w io.Writer, v reflect.Value) error {
 	}
 
 	return nil
-}
-
-func makeCompressionHandler(h *typeHandler) *typeHandler {
-	return &typeHandler{
-		length:  -1,
-		handler: &compressionReadWriter{h},
-	}
 }

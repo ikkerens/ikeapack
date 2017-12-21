@@ -21,7 +21,7 @@ type Serializer interface {
 }
 
 type customReadWriter struct {
-	fallback *typeHandler
+	fallback readWriter
 }
 
 func (c *customReadWriter) read(r io.Reader, v reflect.Value) error {

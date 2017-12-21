@@ -4,50 +4,68 @@ import (
 	"bytes"
 	"encoding/hex"
 	"fmt"
-	"os"
+	"io"
 	"testing"
 )
 
-type test struct {
+/* Test types */
+
+type testStruct struct {
 	A uint32
-	B uint64
+	B int64
 	C []uint16
 	D string
 	E []uint16 `compressed:"true"`
+
+	F testSubStruct
+	G testInterface
 }
 
-var compare []byte
+type testSubStruct struct {
+	A byte
+}
 
-const compressionConst = 42
+type testInterface struct {
+	A int64
+}
 
-var compressionValue []uint16
+func (t *testInterface) Deserialize(r io.Reader) error {
+	return Read(r, &t.A)
+}
 
-func TestMain(m *testing.M) {
-	compare, _ = hex.DecodeString("000000010000000000000001000000040001000200030004000000047465737400000098ecc1311100000800a1b78efd033a5883a3a916000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e05d000000ffff")
-	compressionValue = make([]uint16, 16*256*16)
-	for i := range compressionValue {
-		compressionValue[i] = compressionConst
+func (t *testInterface) Serialize(w io.Writer) error {
+	return Write(w, &t.A)
+}
+
+/* Test data */
+var source = &testStruct{1, 2, []uint16{3, 4, 5, 6}, "test", compressData, testSubStruct{7}, testInterface{8}}
+var testData, _ = hex.DecodeString("0000000100000000000000020000000400030004000500060000000474657374000000ddecc1411500000405b0af8ea072882a83fbde52b36900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e0eb020000ffff070000000000000008")
+var compressData = make([]uint16, 100000)
+
+func init() {
+	for i := range compressData {
+		compressData[i] = 42
 	}
-
-	os.Exit(m.Run())
 }
+
+/* Tests */
 
 func TestWrite(t *testing.T) {
 	buf := new(bytes.Buffer)
-	if err := Write(buf, &test{1, 1, []uint16{1, 2, 3, 4}, "test", compressionValue}); err != nil {
+	if err := Write(buf, source); err != nil {
 		t.Error(err)
 		return
 	}
 
 	result := buf.Bytes()
-	if len(result) != len(compare) {
-		fmt.Printf("Failing TestWrite, result \"%s\" length (%d) does not match compare length (%d)\n", hex.EncodeToString(result), len(result), len(compare))
+	if len(result) != len(testData) {
+		fmt.Printf("Failing TestWrite, result \"%s\" length (%d) does not match test data length (%d)\n", hex.EncodeToString(result), len(result), len(testData))
 		t.FailNow()
 	}
 
-	for i := 0; i < len(compare); i++ {
-		if result[i] != compare[i] {
-			fmt.Printf("Failing TestWrite, hex output \"%s\" does not match compare slice\n", hex.EncodeToString(result))
+	for i := 0; i < len(testData); i++ {
+		if result[i] != testData[i] {
+			fmt.Printf("Failing TestWrite, hex output \"%s\" does not match test data slice\n", hex.EncodeToString(result))
 			t.FailNow()
 		}
 	}
@@ -55,30 +73,32 @@ func TestWrite(t *testing.T) {
 
 func TestRead(t *testing.T) {
 	buf := new(bytes.Buffer)
-	buf.Write(compare)
+	buf.Write(testData)
 
-	tst := new(test)
+	tst := new(testStruct)
 	if err := Read(buf, tst); err != nil {
 		t.Error(err)
 		return
 	}
 
-	if tst.A != 1 || tst.B != 1 ||
-		len(tst.C) != 4 || tst.C[0] != 1 || tst.C[1] != 2 || tst.C[2] != 3 || tst.C[3] != 4 ||
-		tst.D != "test" {
-		fmt.Printf("Failing TestRead, result struct: %+v\n", tst)
-		t.FailNow()
+	compare(t, "A", tst.A, source.A)
+	compare(t, "B", tst.B, source.B)
+	compare(t, "len(C)", len(tst.C), len(source.C))
+	for i := range source.C {
+		compare(t, fmt.Sprintf("C[%d]", i), tst.C[i], source.C[i])
 	}
-
-	if len(tst.E) != len(compressionValue) {
-		fmt.Printf("Failing TestRead, decompressed array length does not match (expected: %d, got %d)", len(compressionValue), len(tst.E))
-		t.FailNow()
+	compare(t, "D", tst.D, source.D)
+	compare(t, "len(E)", len(tst.E), len(source.E))
+	for i := range source.E {
+		compare(t, fmt.Sprintf("E[%d]", i), tst.E[i], source.E[i])
 	}
+	compare(t, "F (sub-struct)", tst.F.A, source.F.A)
+	compare(t, "G (interface)", tst.G.A, source.G.A)
+}
 
-	for _, val := range tst.E {
-		if val != compressionConst {
-			fmt.Printf("Failing TestRead, decompressed array entry does not match expected value")
-			t.FailNow()
-		}
+func compare(t *testing.T, field string, value1, value2 interface{}) {
+	if value1 != value2 {
+		fmt.Printf("Failing TestRead, decoded data field '%s' with value '%v' does not match '%v'", field, value1, value2)
+		t.FailNow()
 	}
 }

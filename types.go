@@ -6,24 +6,27 @@ import (
 	"reflect"
 )
 
-type typeHandler struct {
-	length  int
-	handler interface{}
-}
+type readWriter interface{}
 
 type fixedReadWriter interface {
+	readWriter
+
+	length() int
+
 	read([]byte, reflect.Value)
 
 	write([]byte, reflect.Value)
 }
 
 type variableReadWriter interface {
+	readWriter
+
 	read(io.Reader, reflect.Value) error
 
 	write(io.Writer, reflect.Value) error
 }
 
-func getTypeHandler(typ reflect.Type) *typeHandler {
+func getTypeHandler(typ reflect.Type) readWriter {
 	kind := typ.Kind()
 
 	primitive, ok := primitiveIndex[kind]

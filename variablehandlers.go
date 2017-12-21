@@ -5,10 +5,10 @@ import (
 	"reflect"
 )
 
-func handleVariableReader(r io.Reader, h *typeHandler, v reflect.Value) error {
-	switch hr := h.handler.(type) {
+func handleVariableReader(r io.Reader, h readWriter, v reflect.Value) error {
+	switch hr := h.(type) {
 	case fixedReadWriter:
-		b := make([]byte, h.length)
+		b := make([]byte, hr.length())
 		if _, err := io.ReadFull(r, b); err != nil {
 			return err
 		}
@@ -23,10 +23,10 @@ func handleVariableReader(r io.Reader, h *typeHandler, v reflect.Value) error {
 	return nil
 }
 
-func handleVariableWriter(w io.Writer, h *typeHandler, v reflect.Value) error {
-	switch hw := h.handler.(type) {
+func handleVariableWriter(w io.Writer, h readWriter, v reflect.Value) error {
+	switch hw := h.(type) {
 	case fixedReadWriter:
-		b := make([]byte, h.length)
+		b := make([]byte, hw.length())
 		hw.write(b, v)
 
 		if _, err := w.Write(b); err != nil {

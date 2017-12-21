@@ -8,10 +8,7 @@ import (
 	"unicode/utf8"
 )
 
-var stringTypeHandler = &typeHandler{
-	length:  -1,
-	handler: &stringReadWriter{},
-}
+var stringTypeHandler = new(stringReadWriter)
 
 type stringReadWriter struct{}
 
