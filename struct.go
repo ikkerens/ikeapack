@@ -57,9 +57,9 @@ func scanStruct(t reflect.Type) readWriter {
 
 	if length != -1 {
 		return &fixedStructReadWriter{length, handlers}
-	} else {
-		return &variableStructReadWriter{handlers}
 	}
+
+	return &variableStructReadWriter{handlers}
 }
 
 type fixedStructReadWriter struct {
