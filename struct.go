@@ -49,6 +49,7 @@ func scanStruct(t reflect.Type) readWriter {
 		}
 
 		if value, ok := field.Tag.Lookup("compressed"); ok && value == "true" {
+			length = -1
 			h = &compressionReadWriter{h}
 		}
 
