@@ -41,6 +41,8 @@ func getTypeHandler(typ reflect.Type) readWriter {
 		return getStructHandlerFromType(typ)
 	case reflect.Slice:
 		return getSliceHandlerFromType(typ)
+	case reflect.Map:
+		return getMapHandlerFromType(typ)
 	default:
 		panic(fmt.Sprintf("Cannot build type handler for type \"%s\" with kind nr. %d", typ.String(), typ.Kind()))
 	}
