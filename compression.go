@@ -9,10 +9,11 @@ import (
 )
 
 type compressionReadWriter struct {
+	variableImpl
 	handler readWriter
 }
 
-func (c *compressionReadWriter) read(r io.Reader, v reflect.Value) error {
+func (c *compressionReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 	lb := make([]byte, 4)
 	if _, err := io.ReadFull(r, lb); err != nil {
 		return err
@@ -30,7 +31,7 @@ func (c *compressionReadWriter) read(r io.Reader, v reflect.Value) error {
 	return handleVariableReader(z, c.handler, v)
 }
 
-func (c *compressionReadWriter) write(w io.Writer, v reflect.Value) error {
+func (c *compressionReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	var b bytes.Buffer
 
 	z, err := flate.NewWriter(&b, flate.BestCompression)

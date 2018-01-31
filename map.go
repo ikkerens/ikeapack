@@ -16,19 +16,29 @@ func getMapHandlerFromType(t reflect.Type) readWriter {
 	}
 
 	t.Key()
-	info := &mapReadWriter{t, t.Key(), t.Elem(), getTypeHandler(t.Key()), getTypeHandler(t.Elem())}
+	info := &mapReadWriter{
+		mapType: t,
+
+		keyType:    t.Key(),
+		keyHandler: getTypeHandler(t.Key()),
+
+		valueType:    t.Elem(),
+		valueHandler: getTypeHandler(t.Elem()),
+	}
 	mapIndex.Store(t.String(), info)
 
 	return info
 }
 
 type mapReadWriter struct {
+	variableImpl
+
 	mapType                  reflect.Type
 	keyType, valueType       reflect.Type
 	keyHandler, valueHandler readWriter
 }
 
-func (s *mapReadWriter) read(r io.Reader, v reflect.Value) error {
+func (s *mapReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 	b := make([]byte, 4)
 	if _, err := io.ReadFull(r, b); err != nil {
 		return err
@@ -50,7 +60,7 @@ func (s *mapReadWriter) read(r io.Reader, v reflect.Value) error {
 	return nil
 }
 
-func (s *mapReadWriter) write(w io.Writer, v reflect.Value) error {
+func (s *mapReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	b := make([]byte, 4)
 	binary.BigEndian.PutUint32(b, uint32(v.Len()))
 

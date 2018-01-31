@@ -6,24 +6,26 @@ import (
 	"reflect"
 )
 
-type readWriter interface{}
+type readWriter interface {
+	isFixed() bool
+}
 
 type fixedReadWriter interface {
 	readWriter
 
 	length() int
 
-	read([]byte, reflect.Value)
+	readFixed([]byte, reflect.Value)
 
-	write([]byte, reflect.Value)
+	writeFixed([]byte, reflect.Value)
 }
 
 type variableReadWriter interface {
 	readWriter
 
-	read(io.Reader, reflect.Value) error
+	readVariable(io.Reader, reflect.Value) error
 
-	write(io.Writer, reflect.Value) error
+	writeVariable(io.Writer, reflect.Value) error
 }
 
 func getTypeHandler(typ reflect.Type) readWriter {
@@ -46,4 +48,16 @@ func getTypeHandler(typ reflect.Type) readWriter {
 	default:
 		panic(fmt.Sprintf("Cannot build type handler for type \"%s\" with kind nr. %d", typ.String(), typ.Kind()))
 	}
+}
+
+type fixedImpl struct{}
+
+func (*fixedImpl) isFixed() bool {
+	return true
+}
+
+type variableImpl struct{}
+
+func (*variableImpl) isFixed() bool {
+	return false
 }

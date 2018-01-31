@@ -94,7 +94,7 @@ func TestRead(t *testing.T) {
 		compare(t, fmt.Sprintf("E[%d]", i), tst.E[i], source.E[i])
 	}
 	for k := range source.F {
-		compare(t, fmt.Sprintf("F[%s]", k), tst.F[k], source.F[k])
+		compare(t, fmt.Sprintf("F[%d]", k), tst.F[k], source.F[k])
 	}
 	compare(t, "G (sub-struct)", tst.G.A, source.G.A)
 	compare(t, "H (interface)", tst.H.A, source.H.A)

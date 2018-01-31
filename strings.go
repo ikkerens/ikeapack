@@ -10,9 +10,11 @@ import (
 
 var stringTypeHandler = new(stringReadWriter)
 
-type stringReadWriter struct{}
+type stringReadWriter struct {
+	variableImpl
+}
 
-func (s *stringReadWriter) read(r io.Reader, v reflect.Value) error {
+func (s *stringReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 	b := make([]byte, 4)
 	if _, err := io.ReadFull(r, b); err != nil {
 		return err
@@ -30,7 +32,7 @@ func (s *stringReadWriter) read(r io.Reader, v reflect.Value) error {
 	return nil
 }
 
-func (s *stringReadWriter) write(w io.Writer, v reflect.Value) error {
+func (s *stringReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	b := make([]byte, 4)
 	binary.BigEndian.PutUint32(b, uint32(v.Len()))
 

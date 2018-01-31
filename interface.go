@@ -21,10 +21,11 @@ type Serializer interface {
 }
 
 type customReadWriter struct {
+	variableImpl
 	fallback readWriter
 }
 
-func (c *customReadWriter) read(r io.Reader, v reflect.Value) error {
+func (c *customReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 	var err error
 	if d, ok := v.Addr().Interface().(Deserializer); ok {
 		err = d.Deserialize(r)
@@ -34,7 +35,7 @@ func (c *customReadWriter) read(r io.Reader, v reflect.Value) error {
 	return err
 }
 
-func (c *customReadWriter) write(w io.Writer, v reflect.Value) error {
+func (c *customReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	var err error
 	if s, ok := v.Addr().Interface().(Serializer); ok {
 		err = s.Serialize(w)
