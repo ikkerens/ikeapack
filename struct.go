@@ -15,6 +15,8 @@ func getStructHandlerFromType(t reflect.Type) readWriter {
 	}
 
 	ret := new(structWrapper)
+	ret.Lock()
+	defer ret.Unlock()
 	structIndex.Store(t.String(), ret)
 
 	interfaceTest := reflect.New(t).Type()
@@ -64,10 +66,14 @@ func scanStruct(t reflect.Type) readWriter {
 }
 
 type structWrapper struct {
+	sync.Mutex
 	wrapped readWriter
 }
 
 func (s *structWrapper) isFixed() bool {
+	s.Lock()
+	defer s.Unlock()
+
 	return s.wrapped.isFixed()
 }
 
