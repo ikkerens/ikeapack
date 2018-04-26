@@ -27,6 +27,15 @@ func (p *primitiveReadWriter) writeFixed(data []byte, v reflect.Value) {
 }
 
 var primitiveIndex = map[reflect.Kind]readWriter{
+	reflect.Int: &primitiveReadWriter{
+		size: 0,
+		reader: func(b []byte, v reflect.Value) {
+			panic("the inexplicit int type is unsupported, as its length depends on the compiler architecture")
+		},
+		writer: func(b []byte, v reflect.Value) {
+			panic("the inexplicit int type is unsupported, as its length depends on the compiler architecture")
+		},
+	},
 	reflect.Bool: &primitiveReadWriter{
 		size: 1,
 		reader: func(b []byte, v reflect.Value) {

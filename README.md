@@ -23,6 +23,10 @@ Originally this package was made as an extension to binary.Read and binary.Write
 * Strings are stored with a uint32 prefix indicating their length
 * Compression blocks are stored using deflate (level 9) with a uint32 prefixing the size of the compressed data blob
 
+#### Note
+The type `int` is not supported as it does not have a fixed length (it depends on compiler architecture), therefore you
+have to be explicit. E.g. `int32`
+
 ## Include in your project
 ```go
 import "github.com/ikkerens/serialize"
