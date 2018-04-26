@@ -1,4 +1,13 @@
 language: go
 sudo: false
 go:
-  - 1.9
+  - 1.9.x
+  - 1.10.x
+install:
+    - go get github.com/ikkerens/serialize
+    - go get -v .
+    - go get -v github.com/golang/lint/golint
+script:
+    - diff <(gofmt -d .) <(echo -n)
+    - go vet -x ./...
+    - golint -set_exit_status ./...

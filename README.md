@@ -64,6 +64,6 @@ func main() {
 		log.Fatalln(err)
 	}
 
-	log.Printf("Succesfully deserialized: %+v", newBlob)
+	log.Printf("Successfully deserialized: %+v", newBlob)
 }
 ```
