@@ -1,4 +1,4 @@
-# Go packed serializer [![Build Status](https://travis-ci.org/Ikkerens/serialize.svg?branch=master)](https://travis-ci.org/Ikkerens/serialize) [![Go Report Card](https://goreportcard.com/badge/github.com/Ikkerens/serialize)](https://goreportcard.com/report/github.com/Ikkerens/serialize) [![GoDoc](https://godoc.org/github.com/Ikkerens/serialize?status.svg)](https://godoc.org/github.com/Ikkerens/serialize)
+# Go packed serializer [![Build Status](https://travis-ci.org/ikkerens/serialize.svg?branch=master)](https://travis-ci.org/ikkerens/serialize) [![Go Report Card](https://goreportcard.com/badge/github.com/ikkerens/serialize)](https://goreportcard.com/report/github.com/ikkerens/serialize) [![GoDoc](https://godoc.org/github.com/ikkerens/serialize?status.svg)](https://godoc.org/github.com/ikkerens/serialize)
 
 This is a packed struct serializer that is mostly meant for a private project but was released as it may be useful to someone else.
 
