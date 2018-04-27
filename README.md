@@ -10,8 +10,8 @@ Originally this package was made as an extension to binary.Read and binary.Write
 * Tread safe (the calls are, reading to the value is not)
 * Easy to implement in other languages
 * Supported types:
-  * uint, uint8 (and byte) up to uint64
-  * int, int8 up to int64
+  * uint8 (and byte) up to uint64
+  * int8 up to int64
   * float32 and float64
   * string
   * anything implementing the Serializer/Deserializer interfaces
@@ -25,9 +25,8 @@ Originally this package was made as an extension to binary.Read and binary.Write
 * Compression blocks are stored using deflate (level 9) with a uint32 prefixing the size of the compressed data blob
 
 #### Note about int/uint
-The types `int` and `uint` will be treated as `int64` and `uint64` respectively, as their actual sizes are
-dependant on the compiler architecture used. However, they are not recommended as the receiving end may not fit
-storing 64 bits in their int type, thus overflowing.
+The types `int` and `uint` are not supported because their actual sizes depend on the compiler architecture.  
+Instead, be explicit and use int32/int64/uint32/uint64.
 
 ## Include in your project
 ```go

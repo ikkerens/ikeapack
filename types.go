@@ -44,6 +44,11 @@ func getTypeHandler(typ reflect.Type) readWriter {
 		return getSliceHandlerFromType(typ)
 	case reflect.Map:
 		return getMapHandlerFromType(typ)
+	case reflect.Uint:
+		fallthrough
+	case reflect.Int:
+		panic("types uint and int are not supported, as their actual size is dependant on compiler architecture and" +
+			" could cause data inconsistencies. use uint32/uint64/int32/int64 instead")
 	default:
 		panic(fmt.Sprintf("Cannot build type handler for type \"%s\" with kind nr. %d", typ.String(), typ.Kind()))
 	}
