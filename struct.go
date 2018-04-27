@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	structIndex     = make(map[string]*structWrapper)
+	structIndex     = make(map[string]readWriter)
 	structIndexLock sync.RWMutex
 )
 
@@ -23,6 +23,7 @@ func getStructHandlerFromType(t reflect.Type) readWriter {
 	ret.Lock()
 	defer ret.Unlock()
 
+	// For now, insert the wrapper, so recursive struct calls won't cause an infinite stack
 	structIndexLock.Lock()
 	structIndex[t.String()] = ret
 	structIndexLock.Unlock()
@@ -39,6 +40,11 @@ func getStructHandlerFromType(t reflect.Type) readWriter {
 	} else {
 		ret.readWriter = scanStruct(t)
 	}
+
+	// Replace the original with the direct version (major performance boost)
+	structIndexLock.Lock()
+	structIndex[t.String()] = ret.readWriter
+	structIndexLock.Unlock()
 
 	return ret.readWriter
 }
