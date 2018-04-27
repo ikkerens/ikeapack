@@ -27,24 +27,6 @@ func (p *primitiveReadWriter) writeFixed(data []byte, v reflect.Value) {
 }
 
 var primitiveIndex = map[reflect.Kind]*primitiveReadWriter{
-	reflect.Int: {
-		size: 0,
-		reader: func(b []byte, v reflect.Value) {
-			panic("only integers with an explicit length are supported (e.g. int8, int16, int32, int64)")
-		},
-		writer: func(b []byte, v reflect.Value) {
-			panic("only integers with an explicit length are supported (e.g. int8, int16, int32, int64)")
-		},
-	},
-	reflect.Uint: {
-		size: 0,
-		reader: func(b []byte, v reflect.Value) {
-			panic("only integers with an explicit length are supported (e.g. int8, int16, int32, int64)")
-		},
-		writer: func(b []byte, v reflect.Value) {
-			panic("only integers with an explicit length are supported (e.g. int8, int16, int32, int64)")
-		},
-	},
 	reflect.Bool: {
 		size: 1,
 		reader: func(b []byte, v reflect.Value) {
@@ -92,6 +74,15 @@ var primitiveIndex = map[reflect.Kind]*primitiveReadWriter{
 			binary.BigEndian.PutUint64(b, uint64(v.Int()))
 		},
 	},
+	reflect.Int: {
+		size: 8,
+		reader: func(b []byte, v reflect.Value) {
+			v.SetInt(int64(binary.BigEndian.Uint64(b)))
+		},
+		writer: func(b []byte, v reflect.Value) {
+			binary.BigEndian.PutUint64(b, uint64(v.Int()))
+		},
+	},
 	reflect.Uint8: {
 		size: 1,
 		reader: func(b []byte, v reflect.Value) {
@@ -120,6 +111,15 @@ var primitiveIndex = map[reflect.Kind]*primitiveReadWriter{
 		},
 	},
 	reflect.Uint64: {
+		size: 8,
+		reader: func(b []byte, v reflect.Value) {
+			v.SetUint(binary.BigEndian.Uint64(b))
+		},
+		writer: func(b []byte, v reflect.Value) {
+			binary.BigEndian.PutUint64(b, v.Uint())
+		},
+	},
+	reflect.Uint: {
 		size: 8,
 		reader: func(b []byte, v reflect.Value) {
 			v.SetUint(binary.BigEndian.Uint64(b))

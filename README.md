@@ -8,14 +8,15 @@ Originally this package was made as an extension to binary.Read and binary.Write
 * Caches types for faster calls to the same type
 * Compression support
 * Tread safe (the calls are, reading to the value is not)
+* Easy to implement in other languages
 * Supported types:
-  * uint8 (byte) up to uint64
-  * int8 up to int64
+  * uint, uint8 (and byte) up to uint64
+  * int, int8 up to int64
   * float32 and float64
   * string
-  * structs containing any of the above
-  * slices containing any of the above
   * anything implementing the Serializer/Deserializer interfaces
+  * slices
+  * structs
 
 #### Format
 * All primitives are stored in big endian format
@@ -23,9 +24,10 @@ Originally this package was made as an extension to binary.Read and binary.Write
 * Strings are stored with a uint32 prefix indicating their length
 * Compression blocks are stored using deflate (level 9) with a uint32 prefixing the size of the compressed data blob
 
-#### Note
-The type `int` and `uint` are not supported as they does not have a fixed length (it depends on compiler architecture), therefore you
-have to be explicit. E.g. `int16`, `uint32`
+#### Note about int/uint
+The types `int` and `uint` will be treated as `int64` and `uint64` respectively, as their actual sizes are
+dependant on the compiler architecture used. However, they are not recommended as the receiving end may not fit
+storing 64 bits in their int type, thus overflowing.
 
 ## Include in your project
 ```go
