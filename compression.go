@@ -9,7 +9,7 @@ import (
 )
 
 type compressionReadWriter struct {
-	variableImpl
+	variable
 	handler readWriter
 }
 

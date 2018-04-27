@@ -21,7 +21,7 @@ type Serializer interface {
 }
 
 type customReadWriter struct {
-	variableImpl
+	variable
 	fallback readWriter
 }
 

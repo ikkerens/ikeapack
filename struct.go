@@ -33,14 +33,14 @@ func getStructHandlerFromType(t reflect.Type) readWriter {
 		hasSerializer   = interfaceTest.Implements(serializerInterface)
 	)
 	if hasDeserializer && hasSerializer {
-		ret.wrapped = &customReadWriter{fallback: nil}
+		ret.readWriter = &customReadWriter{fallback: nil}
 	} else if hasDeserializer || hasSerializer {
-		ret.wrapped = &customReadWriter{fallback: scanStruct(t)}
+		ret.readWriter = &customReadWriter{fallback: scanStruct(t)}
 	} else {
-		ret.wrapped = scanStruct(t)
+		ret.readWriter = scanStruct(t)
 	}
 
-	return ret.wrapped
+	return ret.readWriter
 }
 
 func scanStruct(t reflect.Type) readWriter {
@@ -75,38 +75,38 @@ func scanStruct(t reflect.Type) readWriter {
 
 type structWrapper struct {
 	sync.Mutex
-	wrapped readWriter
+	readWriter
 }
 
 func (s *structWrapper) isFixed() bool {
 	s.Lock()
 	defer s.Unlock()
 
-	return s.wrapped.isFixed()
+	return s.readWriter.isFixed()
 }
 
 func (s *structWrapper) readVariable(r io.Reader, v reflect.Value) error {
-	return s.wrapped.(variableReadWriter).readVariable(r, v)
+	return s.readWriter.(variableReadWriter).readVariable(r, v)
 }
 
 func (s *structWrapper) writeVariable(w io.Writer, v reflect.Value) error {
-	return s.wrapped.(variableReadWriter).writeVariable(w, v)
+	return s.readWriter.(variableReadWriter).writeVariable(w, v)
 }
 
 func (s *structWrapper) length() int {
-	return s.wrapped.(fixedReadWriter).length()
+	return s.readWriter.(fixedReadWriter).length()
 }
 
 func (s *structWrapper) readFixed(b []byte, v reflect.Value) {
-	s.wrapped.(fixedReadWriter).readFixed(b, v)
+	s.readWriter.(fixedReadWriter).readFixed(b, v)
 }
 
 func (s *structWrapper) writeFixed(b []byte, v reflect.Value) {
-	s.wrapped.(fixedReadWriter).writeFixed(b, v)
+	s.readWriter.(fixedReadWriter).writeFixed(b, v)
 }
 
 type fixedStructReadWriter struct {
-	fixedImpl
+	fixed
 
 	size     int
 	handlers []readWriter
@@ -135,7 +135,7 @@ func (s *fixedStructReadWriter) writeFixed(data []byte, v reflect.Value) {
 }
 
 type variableStructReadWriter struct {
-	variableImpl
+	variable
 
 	handlers []readWriter
 }

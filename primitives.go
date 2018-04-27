@@ -7,7 +7,7 @@ import (
 )
 
 type primitiveReadWriter struct {
-	fixedImpl
+	fixed
 
 	size   int
 	reader func([]byte, reflect.Value)
@@ -26,8 +26,8 @@ func (p *primitiveReadWriter) writeFixed(data []byte, v reflect.Value) {
 	p.writer(data, v)
 }
 
-var primitiveIndex = map[reflect.Kind]readWriter{
-	reflect.Int: &primitiveReadWriter{
+var primitiveIndex = map[reflect.Kind]*primitiveReadWriter{
+	reflect.Int: {
 		size: 0,
 		reader: func(b []byte, v reflect.Value) {
 			panic("only integers with an explicit length are supported (e.g. int8, int16, int32, int64)")
@@ -36,7 +36,7 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 			panic("only integers with an explicit length are supported (e.g. int8, int16, int32, int64)")
 		},
 	},
-	reflect.Uint: &primitiveReadWriter{
+	reflect.Uint: {
 		size: 0,
 		reader: func(b []byte, v reflect.Value) {
 			panic("only integers with an explicit length are supported (e.g. int8, int16, int32, int64)")
@@ -45,7 +45,7 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 			panic("only integers with an explicit length are supported (e.g. int8, int16, int32, int64)")
 		},
 	},
-	reflect.Bool: &primitiveReadWriter{
+	reflect.Bool: {
 		size: 1,
 		reader: func(b []byte, v reflect.Value) {
 			v.SetBool(b[0] != 0)
@@ -56,7 +56,7 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 			}
 		},
 	},
-	reflect.Int8: &primitiveReadWriter{
+	reflect.Int8: {
 		size: 1,
 		reader: func(b []byte, v reflect.Value) {
 			v.SetInt(int64(b[0]))
@@ -65,7 +65,7 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 			b[0] = byte(v.Int())
 		},
 	},
-	reflect.Int16: &primitiveReadWriter{
+	reflect.Int16: {
 		size: 2,
 		reader: func(b []byte, v reflect.Value) {
 			v.SetInt(int64(binary.BigEndian.Uint16(b)))
@@ -74,7 +74,7 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 			binary.BigEndian.PutUint16(b, uint16(v.Int()))
 		},
 	},
-	reflect.Int32: &primitiveReadWriter{
+	reflect.Int32: {
 		size: 4,
 		reader: func(b []byte, v reflect.Value) {
 			v.SetInt(int64(binary.BigEndian.Uint32(b)))
@@ -83,7 +83,7 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 			binary.BigEndian.PutUint32(b, uint32(v.Int()))
 		},
 	},
-	reflect.Int64: &primitiveReadWriter{
+	reflect.Int64: {
 		size: 8,
 		reader: func(b []byte, v reflect.Value) {
 			v.SetInt(int64(binary.BigEndian.Uint64(b)))
@@ -92,7 +92,7 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 			binary.BigEndian.PutUint64(b, uint64(v.Int()))
 		},
 	},
-	reflect.Uint8: &primitiveReadWriter{
+	reflect.Uint8: {
 		size: 1,
 		reader: func(b []byte, v reflect.Value) {
 			v.SetUint(uint64(b[0]))
@@ -101,7 +101,7 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 			b[0] = byte(v.Uint())
 		},
 	},
-	reflect.Uint16: &primitiveReadWriter{
+	reflect.Uint16: {
 		size: 2,
 		reader: func(b []byte, v reflect.Value) {
 			v.SetUint(uint64(binary.BigEndian.Uint16(b)))
@@ -110,7 +110,7 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 			binary.BigEndian.PutUint16(b, uint16(v.Uint()))
 		},
 	},
-	reflect.Uint32: &primitiveReadWriter{
+	reflect.Uint32: {
 		size: 4,
 		reader: func(b []byte, v reflect.Value) {
 			v.SetUint(uint64(binary.BigEndian.Uint32(b)))
@@ -119,7 +119,7 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 			binary.BigEndian.PutUint32(b, uint32(v.Uint()))
 		},
 	},
-	reflect.Uint64: &primitiveReadWriter{
+	reflect.Uint64: {
 		size: 8,
 		reader: func(b []byte, v reflect.Value) {
 			v.SetUint(binary.BigEndian.Uint64(b))
@@ -128,7 +128,7 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 			binary.BigEndian.PutUint64(b, v.Uint())
 		},
 	},
-	reflect.Float32: &primitiveReadWriter{
+	reflect.Float32: {
 		size: 4,
 		reader: func(b []byte, v reflect.Value) {
 			v.SetFloat(float64(math.Float32frombits(binary.BigEndian.Uint32(b))))
@@ -137,7 +137,7 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 			binary.BigEndian.PutUint32(b, math.Float32bits(float32(v.Float())))
 		},
 	},
-	reflect.Float64: &primitiveReadWriter{
+	reflect.Float64: {
 		size: 8,
 		reader: func(b []byte, v reflect.Value) {
 			v.SetFloat(math.Float64frombits(binary.BigEndian.Uint64(b)))

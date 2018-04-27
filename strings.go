@@ -11,7 +11,7 @@ import (
 var stringTypeHandler = new(stringReadWriter)
 
 type stringReadWriter struct {
-	variableImpl
+	variable
 }
 
 func (s *stringReadWriter) readVariable(r io.Reader, v reflect.Value) error {

@@ -31,7 +31,7 @@ func getMapHandlerFromType(t reflect.Type) readWriter {
 }
 
 type mapReadWriter struct {
-	variableImpl
+	variable
 
 	mapType                  reflect.Type
 	keyType, valueType       reflect.Type

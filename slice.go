@@ -29,12 +29,12 @@ func getSliceHandlerFromType(t reflect.Type) readWriter {
 }
 
 type sliceReadWriter struct {
-	variableImpl
+	variable
 	typ     reflect.Type
 	handler readWriter
 }
 
-func (s *sliceReadWriter) readVariable(r io.Reader, v reflect.Value) error {
+func (s sliceReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 	b := make([]byte, 4)
 	if _, err := io.ReadFull(r, b); err != nil {
 		return err
@@ -66,7 +66,7 @@ func (s *sliceReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 	return nil
 }
 
-func (s *sliceReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
+func (s sliceReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	b := make([]byte, 4)
 	binary.BigEndian.PutUint32(b, uint32(v.Len()))
 

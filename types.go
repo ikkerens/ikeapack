@@ -49,14 +49,14 @@ func getTypeHandler(typ reflect.Type) readWriter {
 	}
 }
 
-type fixedImpl struct{}
+type fixed struct{}
 
-func (*fixedImpl) isFixed() bool {
+func (fixed) isFixed() bool {
 	return true
 }
 
-type variableImpl struct{}
+type variable struct{}
 
-func (*variableImpl) isFixed() bool {
+func (variable) isFixed() bool {
 	return false
 }
