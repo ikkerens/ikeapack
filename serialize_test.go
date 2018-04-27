@@ -5,18 +5,21 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"strings"
 	"testing"
 )
 
 /* Test types */
 
 type testStruct struct {
-	A uint32
-	B int64
-	C []uint16
-	D string
-	E []uint16 `compressed:"true"`
-	F map[uint8]string
+	A    uint32
+	B    int64
+	C    []uint16
+	D    string
+	E    []uint16 `compressed:"true"`
+	Pad1 uint16 // We have padding here to split the string later, as map ordering isn't guaranteed
+	F    map[uint8]string
+	Pad2 uint16 // However, map contents will be checked in TestRead
 
 	G testSubStruct
 	H testInterface
@@ -39,8 +42,19 @@ func (t *testInterface) Serialize(w io.Writer) error {
 }
 
 /* Test data */
-var source = &testStruct{1, 2, []uint16{3, 4, 5, 6}, "test", compressData, map[uint8]string{7: "seven", 8: "eight"}, testSubStruct{9}, testInterface{10}}
-var testData, _ = hex.DecodeString("0000000100000000000000020000000400030004000500060000000474657374000000ddecc1411500000405b0af8ea072882a83fbde52b36900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e0eb020000ffff000000020700000005736576656e0800000005656967687409000000000000000a")
+var source = &testStruct{
+	A:    1,
+	B:    2,
+	C:    []uint16{3, 4, 5, 6},
+	D:    "test",
+	E:    compressData,
+	Pad1: 0x4242,
+	F:    map[uint8]string{7: "seven", 8: "eight"},
+	Pad2: 0x4242,
+	G:    testSubStruct{9},
+	H:    testInterface{10},
+}
+var testData, _ = hex.DecodeString("0000000100000000000000020000000400030004000500060000000474657374000000ddecc1411500000405b0af8ea072882a83fbde52b36900000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000e0eb020000ffff424200000002080000000565696768740700000005736576656e424209000000000000000a")
 var compressData = make([]uint16, 100000)
 
 func init() {
@@ -64,11 +78,12 @@ func TestWrite(t *testing.T) {
 		t.FailNow()
 	}
 
-	for i := 0; i < len(testData); i++ {
-		if result[i] != testData[i] {
-			fmt.Printf("Failing TestWrite, hex output \"%s\" does not match test data slice\n", hex.EncodeToString(result))
-			t.FailNow()
-		}
+	originalParts := strings.Split(hex.EncodeToString(testData), "4242")
+	resultParts := strings.Split(hex.EncodeToString(result), "4242")
+
+	if originalParts[0] != resultParts[0] || originalParts[2] != resultParts[2] {
+		fmt.Printf("Failing TestWrite, hex output \"%s\" does not match test data slice\n", hex.EncodeToString(result))
+		t.FailNow()
 	}
 }
 
