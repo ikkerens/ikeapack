@@ -30,10 +30,19 @@ var primitiveIndex = map[reflect.Kind]readWriter{
 	reflect.Int: &primitiveReadWriter{
 		size: 0,
 		reader: func(b []byte, v reflect.Value) {
-			panic("the inexplicit int type is unsupported, as its length depends on the compiler architecture")
+			panic("only integers with an explicit length are supported (e.g. int8, int16, int32, int64)")
 		},
 		writer: func(b []byte, v reflect.Value) {
-			panic("the inexplicit int type is unsupported, as its length depends on the compiler architecture")
+			panic("only integers with an explicit length are supported (e.g. int8, int16, int32, int64)")
+		},
+	},
+	reflect.Uint: &primitiveReadWriter{
+		size: 0,
+		reader: func(b []byte, v reflect.Value) {
+			panic("only integers with an explicit length are supported (e.g. int8, int16, int32, int64)")
+		},
+		writer: func(b []byte, v reflect.Value) {
+			panic("only integers with an explicit length are supported (e.g. int8, int16, int32, int64)")
 		},
 	},
 	reflect.Bool: &primitiveReadWriter{
