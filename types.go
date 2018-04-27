@@ -31,8 +31,7 @@ type variableReadWriter interface {
 func getTypeHandler(typ reflect.Type) readWriter {
 	kind := typ.Kind()
 
-	primitive, ok := primitiveIndex[kind]
-	if ok {
+	if primitive, ok := primitiveIndex[kind]; ok {
 		return primitive
 	}
 
