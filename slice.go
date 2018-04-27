@@ -7,16 +7,23 @@ import (
 	"sync"
 )
 
-var sliceIndex = sync.Map{}
+var (
+	sliceIndex     = make(map[string]*sliceReadWriter)
+	sliceIndexLock sync.RWMutex
+)
 
 func getSliceHandlerFromType(t reflect.Type) readWriter {
-	infoV, found := sliceIndex.Load(t.String())
+	sliceIndexLock.RLock()
+	infoV, found := sliceIndex[t.String()]
+	sliceIndexLock.RUnlock()
 	if found {
-		return infoV.(readWriter)
+		return infoV
 	}
 
 	info := &sliceReadWriter{typ: t, handler: getTypeHandler(t.Elem())}
-	sliceIndex.Store(t.String(), info)
+	sliceIndexLock.Lock()
+	sliceIndex[t.String()] = info
+	sliceIndexLock.Unlock()
 
 	return info
 }

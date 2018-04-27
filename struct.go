@@ -6,18 +6,26 @@ import (
 	"sync"
 )
 
-var structIndex = sync.Map{}
+var (
+	structIndex     = make(map[string]*structWrapper)
+	structIndexLock sync.RWMutex
+)
 
 func getStructHandlerFromType(t reflect.Type) readWriter {
-	infoV, found := structIndex.Load(t.String())
+	structIndexLock.RLock()
+	infoV, found := structIndex[t.String()]
+	structIndexLock.RUnlock()
 	if found {
-		return infoV.(readWriter)
+		return infoV
 	}
 
 	ret := new(structWrapper)
 	ret.Lock()
 	defer ret.Unlock()
-	structIndex.Store(t.String(), ret)
+
+	structIndexLock.Lock()
+	structIndex[t.String()] = ret
+	structIndexLock.Unlock()
 
 	interfaceTest := reflect.New(t).Type()
 	var (
