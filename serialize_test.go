@@ -17,9 +17,9 @@ type testStruct struct {
 	C    []uint16
 	D    string
 	E    []uint16 `compressed:"true"`
-	Pad1 uint16 // We have padding here to split the string later, as map ordering isn't guaranteed
+	Pad1 uint16
 	F    map[uint8]string
-	Pad2 uint16 // However, map contents will be checked in TestRead
+	Pad2 uint16
 
 	G testSubStruct
 	H testInterface
@@ -78,6 +78,9 @@ func TestWrite(t *testing.T) {
 		t.FailNow()
 	}
 
+	// In struct creation we've added 0x4242 padding to we can split out the map.
+	// We need to do this because golangs map iteration is always random.
+	// However, for the sake of this test, I'm working around it.
 	originalParts := strings.Split(hex.EncodeToString(testData), "4242")
 	resultParts := strings.Split(hex.EncodeToString(result), "4242")
 
