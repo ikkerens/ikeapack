@@ -3,7 +3,9 @@ package serialize
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
 	"io"
+	"math"
 	"reflect"
 	"unicode/utf8"
 )
@@ -19,7 +21,14 @@ func (s *stringReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 	if _, err := io.ReadFull(r, b); err != nil {
 		return err
 	}
-	str := make([]byte, int(binary.BigEndian.Uint32(b)))
+
+	ul := binary.BigEndian.Uint32(b)
+	if ul > math.MaxInt32 {
+		return fmt.Errorf("transmitted string size too large (%d>%d)", ul, math.MaxInt32)
+	}
+	l := int(ul)
+
+	str := make([]byte, l)
 	if _, err := io.ReadFull(r, str); err != nil {
 		return err
 	}

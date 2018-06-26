@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"compress/flate"
 	"encoding/binary"
+	"fmt"
 	"io"
+	"math"
 	"reflect"
 )
 
@@ -19,8 +21,13 @@ func (c *compressionReadWriter) readVariable(r io.Reader, v reflect.Value) error
 		return err
 	}
 
-	cl := binary.BigEndian.Uint32(lb)
-	cb := make([]byte, cl)
+	ul := binary.BigEndian.Uint32(lb)
+	if ul > math.MaxInt32 {
+		return fmt.Errorf("transmitted compressed blob too large (%d>%d)", ul, math.MaxInt32)
+	}
+	l := int(ul)
+
+	cb := make([]byte, l)
 	if _, err := io.ReadFull(r, cb); err != nil {
 		return err
 	}

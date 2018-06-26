@@ -2,7 +2,9 @@ package serialize
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io"
+	"math"
 	"reflect"
 	"sync"
 )
@@ -43,7 +45,13 @@ func (s *mapReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 	if _, err := io.ReadFull(r, b); err != nil {
 		return err
 	}
-	l := int(binary.BigEndian.Uint32(b))
+
+	ul := binary.BigEndian.Uint32(b)
+	if ul > math.MaxInt32 {
+		return fmt.Errorf("transmitted map size too large (%d>%d)", ul, math.MaxInt32)
+	}
+	l := int(ul)
+
 	mp := reflect.MakeMapWithSize(s.mapType, l)
 
 	for i := 0; i < l; i++ {
