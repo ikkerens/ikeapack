@@ -62,3 +62,11 @@ func (c *compressionReadWriter) writeVariable(w io.Writer, v reflect.Value) erro
 
 	return nil
 }
+
+func (c *compressionReadWriter) length(v reflect.Value) (int, error) {
+	var b bytes.Buffer
+	if err := c.writeVariable(&b, v); err != nil {
+		return 0, err
+	}
+	return b.Len(), nil
+}

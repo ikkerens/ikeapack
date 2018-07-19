@@ -26,3 +26,11 @@ func Write(w io.Writer, data interface{}) error {
 
 	return handleVariableWriter(w, h, v)
 }
+
+// Len will return the amount of bytes Write will use.
+func Len(data interface{}) (int, error) {
+	v := reflect.Indirect(reflect.ValueOf(data))
+	h := getTypeHandler(v.Type())
+
+	return handleVariableLength(h, v)
+}

@@ -85,3 +85,26 @@ func (s *mapReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 
 	return nil
 }
+
+func (s *mapReadWriter) length(v reflect.Value) (int, error) {
+	size := 4
+
+	for _, key := range v.MapKeys() {
+		val := v.MapIndex(key)
+
+		l, err := handleVariableLength(s.keyHandler, key)
+		if err != nil {
+			return 0, err
+		}
+		size += l
+
+		l, err = handleVariableLength(s.valueHandler, val)
+		if err != nil {
+			return 0, err
+		}
+
+		size += l
+	}
+
+	return size, nil
+}

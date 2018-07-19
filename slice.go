@@ -105,3 +105,21 @@ func (s sliceReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 
 	return nil
 }
+
+func (s sliceReadWriter) length(v reflect.Value) (int, error) {
+	if s.handler.isFixed() {
+		return 4 + (v.Len() * s.handler.(fixedReadWriter).length()), nil
+	}
+
+	// variable
+	size := 4
+	h := s.handler.(variableReadWriter)
+	for i := 0; i < v.Len(); i++ {
+		l, err := h.length(v.Index(i))
+		if err != nil {
+			return 0, err
+		}
+		size += l
+	}
+	return size, nil
+}

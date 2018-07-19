@@ -54,3 +54,7 @@ func (s *stringReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 
 	return nil
 }
+
+func (s *stringReadWriter) length(v reflect.Value) (int, error) {
+	return 4 + v.Len(), nil
+}

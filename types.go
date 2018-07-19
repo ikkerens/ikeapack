@@ -23,6 +23,8 @@ type fixedReadWriter interface {
 type variableReadWriter interface {
 	readWriter
 
+	length(reflect.Value) (int, error)
+
 	readVariable(io.Reader, reflect.Value) error
 
 	writeVariable(io.Writer, reflect.Value) error

@@ -156,6 +156,14 @@ func TestCompleteRead(t *testing.T) {
 	}
 }
 
+func TestLen(t *testing.T) {
+	if l, err := Len(source); err != nil {
+		t.Error(err)
+	} else if l != len(testData) {
+		fmt.Printf("Failing TestLen, Len reported an incorrect value %d, should be %d", l, len(testData))
+	}
+}
+
 func compare(t *testing.T, field string, value1, value2 interface{}) {
 	if value1 != value2 {
 		fmt.Printf("Failing TestCompleteRead, decoded data field '%s' with value '%v' does not match '%v'", field, value1, value2)

@@ -42,3 +42,14 @@ func handleVariableWriter(w io.Writer, h readWriter, v reflect.Value) error {
 
 	return nil
 }
+
+func handleVariableLength(h readWriter, v reflect.Value) (int, error) {
+	if h.isFixed() {
+		hl := h.(fixedReadWriter)
+		return hl.length(), nil
+	}
+
+	// variable
+	hl := h.(variableReadWriter)
+	return hl.length(v)
+}

@@ -1,6 +1,7 @@
 package serialize
 
 import (
+	"bytes"
 	"io"
 	"reflect"
 )
@@ -43,4 +44,12 @@ func (c *customReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 		err = handleVariableWriter(w, c.fallback, v)
 	}
 	return err
+}
+
+func (c *customReadWriter) length(v reflect.Value) (int, error) {
+	var b bytes.Buffer
+	if err := c.writeVariable(&b, v); err != nil {
+		return 0, err
+	}
+	return b.Len(), nil
 }

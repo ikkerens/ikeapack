@@ -165,3 +165,17 @@ func (h *variableStructReadWriter) writeVariable(w io.Writer, v reflect.Value) e
 
 	return nil
 }
+
+func (h *variableStructReadWriter) length(v reflect.Value) (int, error) {
+	size := 0
+
+	for i, handler := range h.handlers {
+		l, err := handleVariableLength(handler, v.Field(i))
+		if err != nil {
+			return 0, err
+		}
+		size += l
+	}
+
+	return size, nil
+}
