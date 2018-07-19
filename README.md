@@ -79,7 +79,7 @@ func main() {
 ```
 
 ## Benchmarks
-These benchmarks are based on @alecthomas's [go serialization benchmarks](https://github.com/alecthomas/go_serialization_benchmarks). While not all benchmarks are included since not all dependencies could resolve, these give a good overview of the performance of this lib vs the others.  
+These benchmarks are based on [alecthomas](https://github.com/alecthomas)'s [go serialization benchmarks](https://github.com/alecthomas/go_serialization_benchmarks). While not all benchmarks are included since not all dependencies could resolve, these give a good overview of the performance of this lib vs the others.  
 Note that this library does not have a focus on *being* the fastest in any way, as this was made to cover a specific use-case. But it does strive to be as fast as it can be.
 
 These benchmarks were executed on a Dell laptop with an i7-8550U cpu and 16GB of ram.
