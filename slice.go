@@ -36,7 +36,7 @@ type sliceReadWriter struct {
 	handler readWriter
 }
 
-func (s sliceReadWriter) readVariable(r io.Reader, v reflect.Value) error {
+func (s *sliceReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 	b := make([]byte, 4)
 	if _, err := io.ReadFull(r, b); err != nil {
 		return err
@@ -74,7 +74,7 @@ func (s sliceReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 	return nil
 }
 
-func (s sliceReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
+func (s *sliceReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	b := make([]byte, 4)
 	binary.BigEndian.PutUint32(b, uint32(v.Len()))
 
@@ -106,7 +106,7 @@ func (s sliceReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	return nil
 }
 
-func (s sliceReadWriter) length(v reflect.Value) (int, error) {
+func (s *sliceReadWriter) length(v reflect.Value) (int, error) {
 	if s.handler.isFixed() {
 		return 4 + (v.Len() * s.handler.(fixedReadWriter).length()), nil
 	}
