@@ -1,8 +1,11 @@
-package serialize
+package ikea
 
 import (
+	"compress/flate"
 	"io"
 	"reflect"
+	"strconv"
+	"strings"
 	"sync"
 )
 
@@ -30,12 +33,12 @@ func getStructHandlerFromType(t reflect.Type) readWriter {
 
 	interfaceTest := reflect.New(t).Type()
 	var (
-		hasDeserializer = interfaceTest.Implements(deserializerInterface)
-		hasSerializer   = interfaceTest.Implements(serializerInterface)
+		hasUnpacker = interfaceTest.Implements(unpackerInterface)
+		hasPacker   = interfaceTest.Implements(packerInterface)
 	)
-	if hasDeserializer && hasSerializer {
+	if hasUnpacker && hasPacker {
 		ret.readWriter = &customReadWriter{fallback: nil}
-	} else if hasDeserializer || hasSerializer {
+	} else if hasUnpacker || hasPacker {
 		ret.readWriter = &customReadWriter{fallback: scanStruct(t)}
 	} else {
 		ret.readWriter = scanStruct(t)
@@ -58,15 +61,34 @@ func scanStruct(t reflect.Type) readWriter {
 		typ := field.Type
 		h := getTypeHandler(typ)
 
+		tag, ok := field.Tag.Lookup("ikea")
+		if !ok {
+			tag = ""
+		}
+
+		if tag == "skip" || tag == "-" {
+			continue
+		}
+
 		if f, ok := h.(fixedReadWriter); ok && length != -1 {
 			length += f.length()
 		} else {
 			length = -1
 		}
 
-		if value, ok := field.Tag.Lookup("compressed"); ok && value == "true" {
+		if strings.HasPrefix(tag, "compress") {
 			length = -1
-			h = &compressionReadWriter{handler: h}
+
+			var level int64 = flate.BestCompression
+			if strings.HasPrefix(tag, "compress:") {
+				var err error
+				level, err = strconv.ParseInt(strings.TrimPrefix(tag, "compress:"), 10, 64)
+				if err != nil {
+					panic(err)
+				}
+			}
+
+			h = &compressionReadWriter{handler: h, level: int(level)}
 		}
 
 		handlers = append(handlers, h)
@@ -89,6 +111,10 @@ func (s *structWrapper) isFixed() bool {
 	defer s.Unlock()
 
 	return s.readWriter.isFixed()
+}
+
+func (s *structWrapper) vLength(v reflect.Value) (int, error) {
+	return s.readWriter.(variableReadWriter).vLength(v)
 }
 
 func (s *structWrapper) readVariable(r io.Reader, v reflect.Value) error {
@@ -166,7 +192,7 @@ func (h *variableStructReadWriter) writeVariable(w io.Writer, v reflect.Value) e
 	return nil
 }
 
-func (h *variableStructReadWriter) length(v reflect.Value) (int, error) {
+func (h *variableStructReadWriter) vLength(v reflect.Value) (int, error) {
 	size := 0
 
 	for i, handler := range h.handlers {

@@ -1,4 +1,8 @@
-# Go packed serializer [![Build Status](https://travis-ci.org/ikkerens/serialize.svg?branch=master)](https://travis-ci.org/ikkerens/serialize) [![Go Report Card](https://goreportcard.com/badge/github.com/ikkerens/serialize)](https://goreportcard.com/report/github.com/ikkerens/serialize) [![GoDoc](https://godoc.org/github.com/ikkerens/serialize?status.svg)](https://godoc.org/github.com/ikkerens/serialize)
+# IkeaPack [![Build Status](https://travis-ci.org/ikkerens/ikeapack.svg?branch=master)](https://travis-ci.org/ikkerens/ikeapack) [![Go Report Card](https://goreportcard.com/badge/github.com/ikkerens/ikeapack)](https://goreportcard.com/report/github.com/ikkerens/ikeapack) [![GoDoc](https://godoc.org/github.com/ikkerens/ikeapack?status.svg)](https://godoc.org/github.com/ikkerens/ikeapack)
+
+> Named IkeaPack because it compacts structs in a very compact and packed manner, and if you don't know how to reassemble it, it may just look like a random blob of parts. Just like ikea products!
+
+(If anyone from ikea doesn't like me using their name, just reach out to me and I'll change it, no copyright/trademark infringement intended.)
 
 This is a packed struct serializer that is mostly meant for a private project but was released as it may be useful to someone else.
 
@@ -14,7 +18,7 @@ Originally this package was made as an extension to binary.Read and binary.Write
   * int8 up to int64
   * float32 and float64
   * string
-  * anything implementing the Serializer/Deserializer interfaces
+  * anything implementing the Packer/Unpacker interfaces
   * slices
   * structs
 
@@ -30,7 +34,7 @@ Instead, be explicit and use int32/int64/uint32/uint64.
 
 ## Include in your project
 ```go
-import "github.com/ikkerens/serialize"
+import "github.com/ikkerens/ikeapack"
 ```
 
 ## Usage
@@ -41,13 +45,14 @@ import (
 	"bytes"
 	"log"
 
-	"github.com/ikkerens/serialize"
+	"github.com/ikkerens/ikeapack"
 )
 
 type myBlob struct {
 	A uint64 // all fields have to be exported
-	B []byte `compressed:"true"` // this field will be serialized compressed, can be added anywhere
-	C subBlob
+	B []byte `ikea:"compress:9"` // this field will be packed and compressed, with flate level 5
+	C subBlob                    // If you omit the level `ikea:"compress"`, level 9 will be assumed.
+	D int32 `ikea:"skip"` // Or `ikea:"-"`
 }
 
 type subBlob struct {
@@ -58,30 +63,30 @@ func main() {
 	b := new(bytes.Buffer)
 	blob := &myBlob{A: 1, B: []byte{1, 2, 3, 4}, C: subBlob{D: "test message"}}
 
-	// Serialize
-	if err := serialize.Write(b, blob); err != nil { // Write does not need a pointer, but it is recommended
+	// Pack
+	if err := ikea.Pack(b, blob); err != nil { // Write does not need a pointer, but it is recommended
 		log.Fatalln(err)
 	}
 
-	// Deserialize
+	// Unpack
 	newBlob := new(myBlob)
-	if err := serialize.Read(b, newBlob); err != nil { // Read *needs* a pointer, or it will panic
+	if err := ikea.Unpack(b, newBlob); err != nil { // Read *needs* a pointer, or it will panic
 		log.Fatalln(err)
 	}
 
-	log.Printf("Successfully deserialized: %+v", newBlob)
+	log.Printf("Successfully unpacked: %+v", newBlob)
 }
 ```
 
 ## Benchmarks
-These benchmarks are based on [alecthomas](https://github.com/alecthomas)'s [go serialization benchmarks](https://github.com/alecthomas/go_serialization_benchmarks). While not all benchmarks are included since not all dependencies could resolve, these give a good overview of the performance of this lib vs the others.  
+These benchmarks are based on @alecthomas's [go serialization benchmarks](https://github.com/alecthomas/go_serialization_benchmarks). While not all benchmarks are included since not all dependencies could resolve, these give a good overview of the performance of this lib vs the others.  
 Note that this library does not have a focus on *being* the fastest in any way, as this was made to cover a specific use-case. But it does strive to be as fast as it can be.
 
 These benchmarks were executed on a Dell laptop with an i7-8550U cpu and 16GB of ram.
 
 ```
-BenchmarkIkkerensMarshal-8                       3000000               505 ns/op              72 B/op          8 allocs/op
-BenchmarkIkkerensUnmarshal-8                     2000000               670 ns/op             160 B/op         11 allocs/op
+BenchmarkIkeaMarshal-8                           3000000               505 ns/op              72 B/op          8 allocs/op
+BenchmarkIkeaUnmarshal-8                         2000000               670 ns/op             160 B/op         11 allocs/op
 BenchmarkJsonMarshal-8                            500000              3785 ns/op            1224 B/op          9 allocs/op
 BenchmarkJsonUnmarshal-8                          300000              4412 ns/op             464 B/op          7 allocs/op
 BenchmarkEasyJsonMarshal-8                       1000000              1559 ns/op             784 B/op          5 allocs/op

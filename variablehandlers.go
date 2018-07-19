@@ -1,4 +1,4 @@
-package serialize
+package ikea
 
 import (
 	"io"
@@ -51,5 +51,5 @@ func handleVariableLength(h readWriter, v reflect.Value) (int, error) {
 
 	// variable
 	hl := h.(variableReadWriter)
-	return hl.length(v)
+	return hl.vLength(v)
 }

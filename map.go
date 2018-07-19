@@ -1,4 +1,4 @@
-package serialize
+package ikea
 
 import (
 	"encoding/binary"
@@ -86,7 +86,7 @@ func (s *mapReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	return nil
 }
 
-func (s *mapReadWriter) length(v reflect.Value) (int, error) {
+func (s *mapReadWriter) vLength(v reflect.Value) (int, error) {
 	size := 4
 
 	for _, key := range v.MapKeys() {

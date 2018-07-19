@@ -1,4 +1,4 @@
-package serialize
+package ikea
 
 import (
 	"bytes"
@@ -7,18 +7,18 @@ import (
 )
 
 var (
-	deserializerInterface = reflect.TypeOf((*Deserializer)(nil)).Elem()
-	serializerInterface   = reflect.TypeOf((*Serializer)(nil)).Elem()
+	unpackerInterface = reflect.TypeOf((*Unpacker)(nil)).Elem()
+	packerInterface   = reflect.TypeOf((*Packer)(nil)).Elem()
 )
 
-// Deserializer allows you to implement a custom deserialization strategy for a type
-type Deserializer interface {
-	Deserialize(r io.Reader) error
+// Unpacker allows you to implement a custom unpacking strategy for a type
+type Unpacker interface {
+	Unpack(r io.Reader) error
 }
 
-// Serializer allows you to implement a custom serialization strategy for a type
-type Serializer interface {
-	Serialize(w io.Writer) error
+// Packer allows you to implement a custom packing strategy for a type
+type Packer interface {
+	Pack(w io.Writer) error
 }
 
 type customReadWriter struct {
@@ -28,8 +28,8 @@ type customReadWriter struct {
 
 func (c *customReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 	var err error
-	if d, ok := v.Addr().Interface().(Deserializer); ok {
-		err = d.Deserialize(r)
+	if d, ok := v.Addr().Interface().(Unpacker); ok {
+		err = d.Unpack(r)
 	} else {
 		err = handleVariableReader(r, c.fallback, v)
 	}
@@ -38,15 +38,15 @@ func (c *customReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 
 func (c *customReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	var err error
-	if s, ok := v.Addr().Interface().(Serializer); ok {
-		err = s.Serialize(w)
+	if s, ok := v.Addr().Interface().(Packer); ok {
+		err = s.Pack(w)
 	} else {
 		err = handleVariableWriter(w, c.fallback, v)
 	}
 	return err
 }
 
-func (c *customReadWriter) length(v reflect.Value) (int, error) {
+func (c *customReadWriter) vLength(v reflect.Value) (int, error) {
 	var b bytes.Buffer
 	if err := c.writeVariable(&b, v); err != nil {
 		return 0, err

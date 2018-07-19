@@ -1,4 +1,4 @@
-package serialize
+package ikea
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ type fixedReadWriter interface {
 type variableReadWriter interface {
 	readWriter
 
-	length(reflect.Value) (int, error)
+	vLength(reflect.Value) (int, error)
 
 	readVariable(io.Reader, reflect.Value) error
 

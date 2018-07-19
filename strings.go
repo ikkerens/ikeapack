@@ -1,4 +1,4 @@
-package serialize
+package ikea
 
 import (
 	"encoding/binary"
@@ -55,6 +55,6 @@ func (s *stringReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	return nil
 }
 
-func (s *stringReadWriter) length(v reflect.Value) (int, error) {
+func (s *stringReadWriter) vLength(v reflect.Value) (int, error) {
 	return 4 + v.Len(), nil
 }

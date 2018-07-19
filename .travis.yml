@@ -4,7 +4,7 @@ go:
   - 1.9.x
   - 1.10.x
 install:
-    - go get github.com/ikkerens/serialize
+    - go get github.com/ikkerens/ikeapack
     - go get -v .
     - go get -v github.com/golang/lint/golint
 script:

@@ -1,4 +1,4 @@
-package serialize
+package ikea
 
 import (
 	"bytes"
@@ -13,6 +13,7 @@ import (
 type compressionReadWriter struct {
 	variable
 	handler readWriter
+	level   int
 }
 
 func (c *compressionReadWriter) readVariable(r io.Reader, v reflect.Value) error {
@@ -41,7 +42,7 @@ func (c *compressionReadWriter) readVariable(r io.Reader, v reflect.Value) error
 func (c *compressionReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	var b bytes.Buffer
 
-	z, err := flate.NewWriter(&b, flate.BestCompression)
+	z, err := flate.NewWriter(&b, c.level)
 	if err != nil {
 		return err
 	}
@@ -63,7 +64,7 @@ func (c *compressionReadWriter) writeVariable(w io.Writer, v reflect.Value) erro
 	return nil
 }
 
-func (c *compressionReadWriter) length(v reflect.Value) (int, error) {
+func (c *compressionReadWriter) vLength(v reflect.Value) (int, error) {
 	var b bytes.Buffer
 	if err := c.writeVariable(&b, v); err != nil {
 		return 0, err

@@ -1,13 +1,13 @@
-package serialize
+package ikea
 
 import (
 	"io"
 	"reflect"
 )
 
-// Read will read exactly enough bytes from the specified Reader in order to fill the value passed to data.
-// if data is not a pointer Read will panic
-func Read(r io.Reader, data interface{}) error {
+// Unpack will read exactly enough bytes from the specified Reader in order to fill the value passed to data.
+// if data is not a pointer Unpack will panic
+func Unpack(r io.Reader, data interface{}) error {
 	pv := reflect.ValueOf(data)
 	if pv.Kind() != reflect.Ptr {
 		panic("passed data argument is not a pointer")
@@ -19,15 +19,15 @@ func Read(r io.Reader, data interface{}) error {
 	return handleVariableReader(r, h, v)
 }
 
-// Write will write the value passed in data to the specified Writer
-func Write(w io.Writer, data interface{}) error {
+// Pack will write the value passed in data to the specified Writer
+func Pack(w io.Writer, data interface{}) error {
 	v := reflect.Indirect(reflect.ValueOf(data))
 	h := getTypeHandler(v.Type())
 
 	return handleVariableWriter(w, h, v)
 }
 
-// Len will return the amount of bytes Write will use.
+// Len will return the amount of bytes Pack will use.
 func Len(data interface{}) (int, error) {
 	v := reflect.Indirect(reflect.ValueOf(data))
 	h := getTypeHandler(v.Type())

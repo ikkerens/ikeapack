@@ -1,4 +1,4 @@
-package serialize
+package ikea
 
 import (
 	"encoding/binary"
@@ -106,7 +106,7 @@ func (s *sliceReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	return nil
 }
 
-func (s *sliceReadWriter) length(v reflect.Value) (int, error) {
+func (s *sliceReadWriter) vLength(v reflect.Value) (int, error) {
 	if s.handler.isFixed() {
 		return 4 + (v.Len() * s.handler.(fixedReadWriter).length()), nil
 	}
@@ -115,7 +115,7 @@ func (s *sliceReadWriter) length(v reflect.Value) (int, error) {
 	size := 4
 	h := s.handler.(variableReadWriter)
 	for i := 0; i < v.Len(); i++ {
-		l, err := h.length(v.Index(i))
+		l, err := h.vLength(v.Index(i))
 		if err != nil {
 			return 0, err
 		}

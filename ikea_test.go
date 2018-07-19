@@ -1,4 +1,4 @@
-package serialize
+package ikea
 
 import (
 	"bytes"
@@ -80,12 +80,12 @@ func TestString(t *testing.T) {
 func typeTest(t *testing.T, typ string, value, compare interface{}) {
 	var b bytes.Buffer
 
-	if err := Write(&b, value); err != nil {
+	if err := Pack(&b, value); err != nil {
 		fmt.Fprintf(os.Stderr, "Failing %s, could not write value: %s\n", typ, err.Error())
 		t.FailNow()
 	}
 
-	if err := Read(&b, value); err != nil {
+	if err := Unpack(&b, value); err != nil {
 		fmt.Fprintf(os.Stderr, "Failing %s, could not read value: %s\n", typ, err.Error())
 		t.FailNow()
 	}
@@ -99,7 +99,7 @@ func typeTest(t *testing.T, typ string, value, compare interface{}) {
 
 func TestOutput(t *testing.T) {
 	buf := new(bytes.Buffer)
-	if err := Write(buf, source); err != nil {
+	if err := Pack(buf, source); err != nil {
 		t.Error(err)
 		return
 	}
@@ -127,7 +127,7 @@ func TestCompleteRead(t *testing.T) {
 	buf.Write(testData)
 
 	tst := new(testStruct)
-	if err := Read(buf, tst); err != nil {
+	if err := Unpack(buf, tst); err != nil {
 		t.Error(err)
 		return
 	}
@@ -188,7 +188,7 @@ type testStruct struct {
 	TestSubStruct   testSubStruct
 	TestInterface   testInterface
 	TestSlice       []byte
-	TestCompression []byte `compressed:"true"`
+	TestCompression []byte `ikea:"compress:9"`
 	Padding         uint16 // Maps randomise iteration order, we can't verify this string, so we split using this
 	TestMap         map[string]string
 }
@@ -201,9 +201,9 @@ type testInterface struct {
 	A int64
 }
 
-func (t *testInterface) Deserialize(r io.Reader) error {
+func (t *testInterface) Unpack(r io.Reader) error {
 	var temp int64
-	if err := Read(r, &temp); err != nil {
+	if err := Unpack(r, &temp); err != nil {
 		return err
 	}
 
@@ -212,8 +212,8 @@ func (t *testInterface) Deserialize(r io.Reader) error {
 	return nil
 }
 
-func (t *testInterface) Serialize(w io.Writer) error {
-	return Write(w, t.A+10)
+func (t *testInterface) Pack(w io.Writer) error {
+	return Pack(w, t.A+10)
 }
 
 /* Test data */

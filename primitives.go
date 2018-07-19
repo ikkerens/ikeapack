@@ -1,4 +1,4 @@
-package serialize
+package ikea
 
 import (
 	"encoding/binary"
