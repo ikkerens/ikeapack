@@ -66,10 +66,6 @@ func scanStruct(t reflect.Type) readWriter {
 			tag = ""
 		}
 
-		if tag == "skip" || tag == "-" {
-			continue
-		}
-
 		if f, ok := h.(fixedReadWriter); ok && length != -1 {
 			length += f.length()
 		} else {

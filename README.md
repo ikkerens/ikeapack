@@ -49,10 +49,10 @@ import (
 )
 
 type myBlob struct {
-	A uint64 // all fields have to be exported
-	B []byte `ikea:"compress:9"` // this field will be packed and compressed, with flate level 5
-	C subBlob                    // If you omit the level `ikea:"compress"`, level 9 will be assumed.
-	D int32 `ikea:"skip"` // Or `ikea:"-"`
+	A uint64  // all fields have to be exported
+	B []byte  `ikea:"compress:9"` // this field will be packed and compressed, with flate level 5
+	C subBlob // If you omit the level `ikea:"compress"`, level 9 will be assumed.
+	D int32
 }
 
 type subBlob struct {
