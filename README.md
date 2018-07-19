@@ -111,6 +111,8 @@ BenchmarkGoAvro2TextMarshal-8                     500000              2875 ns/op
 BenchmarkGoAvro2TextUnmarshal-8                   500000              2690 ns/op             807 B/op         34 allocs/op
 BenchmarkGoAvro2BinaryMarshal-8                  2000000               916 ns/op             510 B/op         11 allocs/op
 BenchmarkGoAvro2BinaryUnmarshal-8                2000000               979 ns/op             576 B/op         13 allocs/op
+BenchmarkProtobufMarshal-8                       2000000               984 ns/op             200 B/op          7 allocs/op
+BenchmarkProtobufUnmarshal-8                     2000000               827 ns/op             192 B/op         10 allocs/op
 ```
 
 Below you will find some of the benchmarks that do not rely on Go's reflection at runtime, which creates a significant performance boost, but for diligence it's worth mentioning here regardless.
@@ -123,8 +125,6 @@ BenchmarkCapNProtoMarshal-8                      3000000               483 ns/op
 BenchmarkCapNProtoUnmarshal-8                    3000000               438 ns/op             200 B/op          6 allocs/op
 BenchmarkCapNProto2Marshal-8                     2000000               723 ns/op             244 B/op          3 allocs/op
 BenchmarkCapNProto2Unmarshal-8                   1000000              1019 ns/op             320 B/op          6 allocs/op
-BenchmarkProtobufMarshal-8                       2000000               984 ns/op             200 B/op          7 allocs/op
-BenchmarkProtobufUnmarshal-8                     2000000               827 ns/op             192 B/op         10 allocs/op
 BenchmarkGoprotobufMarshal-8                     3000000               396 ns/op              96 B/op          2 allocs/op
 BenchmarkGoprotobufUnmarshal-8                   2000000               614 ns/op             200 B/op         10 allocs/op
 BenchmarkGogoprotobufMarshal-8                  10000000               162 ns/op              64 B/op          1 allocs/op
