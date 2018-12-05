@@ -58,8 +58,12 @@ func (s *mapReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 		key := reflect.Indirect(reflect.New(s.keyType))
 		val := reflect.Indirect(reflect.New(s.valueType))
 
-		handleVariableReader(r, s.keyHandler, key)
-		handleVariableReader(r, s.valueHandler, val)
+		if err := handleVariableReader(r, s.keyHandler, key); err != nil {
+			return err
+		}
+		if err := handleVariableReader(r, s.valueHandler, val); err != nil {
+			return err
+		}
 
 		mp.SetMapIndex(key, val)
 	}
@@ -79,8 +83,12 @@ func (s *mapReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	for _, key := range v.MapKeys() {
 		val := v.MapIndex(key)
 
-		handleVariableWriter(w, s.keyHandler, key)
-		handleVariableWriter(w, s.valueHandler, val)
+		if err := handleVariableWriter(w, s.keyHandler, key); err != nil {
+			return err
+		}
+		if err := handleVariableWriter(w, s.valueHandler, val); err != nil {
+			return err
+		}
 	}
 
 	return nil
