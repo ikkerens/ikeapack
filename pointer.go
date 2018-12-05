@@ -34,9 +34,10 @@ func (p *pointerWrapper) readVariable(r io.Reader, v reflect.Value) error {
 }
 
 func (p *pointerWrapper) writeVariable(w io.Writer, v reflect.Value) error {
-	s := reflect.New(p.typ)
-	v.Set(s)
-	return p.readWriter.(variableReadWriter).writeVariable(w, s.Elem())
+	if v.IsNil() {
+		v.Set(reflect.New(p.typ))
+	}
+	return p.readWriter.(variableReadWriter).writeVariable(w, v.Elem())
 }
 
 func (p *pointerWrapper) length() int {
@@ -51,7 +52,8 @@ func (p *pointerWrapper) readFixed(b []byte, v reflect.Value) {
 }
 
 func (p *pointerWrapper) writeFixed(b []byte, v reflect.Value) {
-	s := reflect.New(p.typ)
-	v.Set(s)
-	p.readWriter.(fixedReadWriter).writeFixed(b, s.Elem())
+	if v.IsNil() {
+		v.Set(reflect.New(p.typ))
+	}
+	p.readWriter.(fixedReadWriter).writeFixed(b, v.Elem())
 }

@@ -66,8 +66,8 @@ func scanStruct(t reflect.Type) readWriter {
 			tag = ""
 		}
 
-		if f, ok := h.(fixedReadWriter); ok && length != -1 {
-			length += f.length()
+		if h.isFixed() && length != -1 {
+			length += h.(fixedReadWriter).length()
 		} else {
 			length = -1
 		}
