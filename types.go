@@ -38,6 +38,8 @@ func getTypeHandler(typ reflect.Type) readWriter {
 	}
 
 	switch kind {
+	case reflect.Ptr:
+		return getPointerHandlerFromType(typ)
 	case reflect.String:
 		return stringTypeHandler
 	case reflect.Struct:
