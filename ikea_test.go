@@ -112,12 +112,33 @@ func TestOutput(t *testing.T) {
 
 	// In struct creation we've added 0x4242 padding to we can split out the map.
 	// We need to do this because golangs map iteration is always random.
-	// However, for the sake of this test, I'm working around it.
+	// So we'll deal with that one later in this test.
 	originalParts := strings.Split(hex.EncodeToString(testData), "4242")
 	resultParts := strings.Split(hex.EncodeToString(result), "4242")
 
 	if originalParts[0] != resultParts[0] {
 		fmt.Printf("Failing TestWrite, hex output \"%s\" does not match test data slice\n", hex.EncodeToString(result))
+		t.FailNow()
+	}
+
+	// Instead, we treat the map a bit differently, we put it back into a buffer
+	buf.Reset()
+	if data, err := hex.DecodeString(resultParts[1]); err != nil {
+		fmt.Printf("Failing TestWrite, hex output \"%s\" is not a valid hex string: %s\n", resultParts[1], err.Error())
+		t.FailNow()
+	} else {
+		buf.Write(data)
+	}
+	// Unpack it
+	var test map[string]string
+	if err := Unpack(buf, &test); err != nil {
+		fmt.Printf("Failing TestWrite, could not unpack map: %s\n", err.Error())
+		t.FailNow()
+	}
+
+	// And then compare it using DeepEqual
+	if !reflect.DeepEqual(source.TestMap, test) {
+		fmt.Printf("Failing TestWrite, resulting map is not equal\n")
 		t.FailNow()
 	}
 }
