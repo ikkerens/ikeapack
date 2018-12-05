@@ -20,6 +20,9 @@ func (p *pointerWrapper) isFixed() bool {
 }
 
 func (p *pointerWrapper) vLength(v reflect.Value) (int, error) {
+	if v.IsNil() {
+		v = reflect.New(p.typ)
+	}
 	return p.readWriter.(variableReadWriter).vLength(v.Elem())
 }
 
