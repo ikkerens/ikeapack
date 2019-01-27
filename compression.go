@@ -47,14 +47,16 @@ func (c *compressionReadWriter) writeVariable(w io.Writer, v reflect.Value) erro
 		return err
 	}
 
-	if err := handleVariableWriter(z, c.handler, v); err != nil {
+	if err = handleVariableWriter(z, c.handler, v); err != nil {
 		return err
 	}
-	z.Close()
+	if err = z.Close(); err != nil {
+		return err
+	}
 
 	lb := make([]byte, 4)
 	binary.BigEndian.PutUint32(lb, uint32(b.Len()))
-	if _, err := w.Write(lb); err != nil {
+	if _, err = w.Write(lb); err != nil {
 		return err
 	}
 	if _, err = w.Write(b.Bytes()); err != nil {
