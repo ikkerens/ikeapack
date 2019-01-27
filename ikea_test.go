@@ -170,10 +170,10 @@ func TestCompleteRead(t *testing.T) {
 	compare(t, "TestFixedPtr", *tst.TestFixedPtr, *source.TestFixedPtr)
 	compare(t, "TestVariablePtr", *tst.TestVariablePtr, *source.TestVariablePtr)
 	for i := range source.TestSlice {
-		compare(t, "TestSlice["+strconv.FormatInt(int64(i), 10)+"]", tst.TestSlice[i], source.TestSlice[i])
+		compare(t, "TestSlice["+strconv.Itoa(i)+"]", tst.TestSlice[i], source.TestSlice[i])
 	}
 	for i := range source.TestCompression {
-		compare(t, "TestCompression["+strconv.FormatInt(int64(i), 10)+"]", tst.TestCompression[i], source.TestCompression[i])
+		compare(t, "TestCompression["+strconv.Itoa(i)+"]", tst.TestCompression[i], source.TestCompression[i])
 	}
 	for k := range source.TestMap {
 		compare(t, "TestMap["+k+"]", tst.TestMap[k], source.TestMap[k])

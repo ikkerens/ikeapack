@@ -75,16 +75,16 @@ func scanStruct(t reflect.Type) readWriter {
 		if strings.HasPrefix(tag, "compress") {
 			length = -1
 
-			var level int64 = flate.BestCompression
+			var level = flate.BestCompression
 			if strings.HasPrefix(tag, "compress:") {
 				var err error
-				level, err = strconv.ParseInt(strings.TrimPrefix(tag, "compress:"), 10, 64)
+				level, err = strconv.Atoi(strings.TrimPrefix(tag, "compress:"))
 				if err != nil {
 					panic(err)
 				}
 			}
 
-			h = &compressionReadWriter{handler: h, level: int(level)}
+			h = &compressionReadWriter{handler: h, level: level}
 		}
 
 		handlers = append(handlers, h)
