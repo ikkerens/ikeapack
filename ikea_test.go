@@ -81,18 +81,19 @@ func typeTest(t *testing.T, typ string, value, compare interface{}) {
 	var b bytes.Buffer
 
 	if err := Pack(&b, value); err != nil {
-		fmt.Fprintf(os.Stderr, "Failing %s, could not write value: %s\n", typ, err.Error())
+		_, _ = fmt.Fprintf(os.Stderr, "Failing %s, could not write value: %s\n", typ, err.Error())
 		t.FailNow()
 	}
 
-	if err := Unpack(&b, value); err != nil {
-		fmt.Fprintf(os.Stderr, "Failing %s, could not read value: %s\n", typ, err.Error())
+	target := reflect.New(reflect.TypeOf(value).Elem())
+	if err := Unpack(&b, target.Interface()); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Failing %s, could not read value: %s\n", typ, err.Error())
 		t.FailNow()
 	}
 
-	dereference := reflect.Indirect(reflect.ValueOf(value)).Interface()
+	dereference := target.Elem().Interface()
 	if dereference != compare {
-		fmt.Fprintf(os.Stderr, "Failing %s, value %+v does not match original %+v\n", typ, dereference, compare)
+		_, _ = fmt.Fprintf(os.Stderr, "Failing %s, %T value %+v does not match original %T %+v\n", typ, dereference, dereference, compare, compare)
 		t.FailNow()
 	}
 }
