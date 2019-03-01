@@ -1,15 +1,14 @@
 language: go
 sudo: false
+env:
+  - GO111MODULE=on
 go:
-  - 1.9.x
-  - 1.10.x
-  - 1.11.x
+  - 1.12.x
 install:
-    - go get github.com/ikkerens/ikeapack
-    - go get -v .
-    - go get -v github.com/golang/lint/golint
+  - go mod download
+#  - go install github.com/golang/lint/golint
 script:
-    - diff <(gofmt -d .) <(echo -n)
-    - go vet -x ./...
-    - golint -set_exit_status ./...
-    - go test -v -race ./...
+  - diff <(gofmt -d .) <(echo -n)
+  - go vet -x ./...
+#  - golint -set_exit_status ./...
+  - go test -v -race ./...
