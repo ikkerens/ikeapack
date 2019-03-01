@@ -80,13 +80,12 @@ func (s *mapReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 		return err
 	}
 
-	for _, key := range v.MapKeys() {
-		val := v.MapIndex(key)
-
-		if err := handleVariableWriter(w, s.keyHandler, key); err != nil {
+	it := v.MapRange()
+	for it.Next() {
+		if err := handleVariableWriter(w, s.keyHandler, it.Key()); err != nil {
 			return err
 		}
-		if err := handleVariableWriter(w, s.valueHandler, val); err != nil {
+		if err := handleVariableWriter(w, s.valueHandler, it.Value()); err != nil {
 			return err
 		}
 	}
