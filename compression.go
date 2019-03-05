@@ -10,13 +10,15 @@ import (
 	"reflect"
 )
 
+var _ variableReadWriter = (*compressionReadWriter)(nil)
+
 type compressionReadWriter struct {
 	variable
 	handler readWriter
 	level   int
 }
 
-func (c *compressionReadWriter) readVariable(r io.Reader, v reflect.Value) error {
+func (c *compressionReadWriter) readVariable(r io.Reader, v reflect.Value) (err error) {
 	lb := make([]byte, 4)
 	if _, err := io.ReadFull(r, lb); err != nil {
 		return err
@@ -34,7 +36,9 @@ func (c *compressionReadWriter) readVariable(r io.Reader, v reflect.Value) error
 	}
 
 	z := flate.NewReader(bytes.NewBuffer(cb))
-	defer z.Close()
+	defer func() {
+		_ = z.Close() // Memory buffer, can never error
+	}()
 
 	return handleVariableReader(z, c.handler, v)
 }
@@ -47,12 +51,8 @@ func (c *compressionReadWriter) writeVariable(w io.Writer, v reflect.Value) erro
 		return err
 	}
 
-	if err = handleVariableWriter(z, c.handler, v); err != nil {
-		return err
-	}
-	if err = z.Close(); err != nil {
-		return err
-	}
+	_ = handleVariableWriter(z, c.handler, v) // As we are using a memory buffer, these two calls can never err
+	_ = z.Close()
 
 	lb := make([]byte, 4)
 	binary.BigEndian.PutUint32(lb, uint32(b.Len()))
@@ -66,10 +66,8 @@ func (c *compressionReadWriter) writeVariable(w io.Writer, v reflect.Value) erro
 	return nil
 }
 
-func (c *compressionReadWriter) vLength(v reflect.Value) (int, error) {
+func (c *compressionReadWriter) vLength(v reflect.Value) int {
 	var b bytes.Buffer
-	if err := c.writeVariable(&b, v); err != nil {
-		return 0, err
-	}
-	return b.Len(), nil
+	_ = c.writeVariable(&b, v)
+	return b.Len()
 }

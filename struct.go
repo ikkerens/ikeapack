@@ -37,19 +37,19 @@ func getStructHandlerFromType(t reflect.Type) readWriter {
 		hasPacker   = interfaceTest.Implements(packerInterface)
 	)
 	if hasUnpacker && hasPacker {
-		ret.readWriter = &customReadWriter{fallback: nil}
+		ret.r = &customReadWriter{fallback: nil}
 	} else if hasUnpacker || hasPacker {
-		ret.readWriter = &customReadWriter{fallback: scanStruct(t)}
+		ret.r = &customReadWriter{fallback: scanStruct(t)}
 	} else {
-		ret.readWriter = scanStruct(t)
+		ret.r = scanStruct(t)
 	}
 
 	// Replace the original with the direct version (major performance boost)
 	structIndexLock.Lock()
-	structIndex[t.String()] = ret.readWriter
+	structIndex[t.String()] = ret.r
 	structIndexLock.Unlock()
 
-	return ret.readWriter
+	return ret.r
 }
 
 func scanStruct(t reflect.Type) readWriter {
@@ -97,30 +97,28 @@ func scanStruct(t reflect.Type) readWriter {
 	return &variableStructReadWriter{handlers: handlers}
 }
 
+// var _ fixedReadWriter = (*structWrapper)(nil)
+var _ variableReadWriter = (*structWrapper)(nil)
+
 type structWrapper struct {
 	sync.Mutex
-	readWriter
+	variable
+	r readWriter
 }
 
-func (s *structWrapper) isFixed() bool {
-	s.Lock()
-	defer s.Unlock()
-
-	return s.readWriter.isFixed()
-}
-
-func (s *structWrapper) vLength(v reflect.Value) (int, error) {
-	return s.readWriter.(variableReadWriter).vLength(v)
+func (s *structWrapper) vLength(v reflect.Value) int {
+	return s.r.(variableReadWriter).vLength(v)
 }
 
 func (s *structWrapper) readVariable(r io.Reader, v reflect.Value) error {
-	return s.readWriter.(variableReadWriter).readVariable(r, v)
+	return s.r.(variableReadWriter).readVariable(r, v)
 }
 
 func (s *structWrapper) writeVariable(w io.Writer, v reflect.Value) error {
-	return s.readWriter.(variableReadWriter).writeVariable(w, v)
+	return s.r.(variableReadWriter).writeVariable(w, v)
 }
 
+/*
 func (s *structWrapper) length() int {
 	return s.readWriter.(fixedReadWriter).length()
 }
@@ -131,7 +129,9 @@ func (s *structWrapper) readFixed(b []byte, v reflect.Value) {
 
 func (s *structWrapper) writeFixed(b []byte, v reflect.Value) {
 	s.readWriter.(fixedReadWriter).writeFixed(b, v)
-}
+}*/
+
+var _ fixedReadWriter = (*fixedStructReadWriter)(nil)
 
 type fixedStructReadWriter struct {
 	fixed
@@ -162,6 +162,8 @@ func (s *fixedStructReadWriter) writeFixed(data []byte, v reflect.Value) {
 	}
 }
 
+var _ variableReadWriter = (*variableStructReadWriter)(nil)
+
 type variableStructReadWriter struct {
 	variable
 
@@ -188,16 +190,12 @@ func (h *variableStructReadWriter) writeVariable(w io.Writer, v reflect.Value) e
 	return nil
 }
 
-func (h *variableStructReadWriter) vLength(v reflect.Value) (int, error) {
+func (h *variableStructReadWriter) vLength(v reflect.Value) int {
 	size := 0
 
 	for i, handler := range h.handlers {
-		l, err := handleVariableLength(handler, v.Field(i))
-		if err != nil {
-			return 0, err
-		}
-		size += l
+		size += handleVariableLength(handler, v.Field(i))
 	}
 
-	return size, nil
+	return size
 }

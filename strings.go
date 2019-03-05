@@ -12,6 +12,8 @@ import (
 
 var stringTypeHandler = new(stringReadWriter)
 
+var _ variableReadWriter = (*stringReadWriter)(nil)
+
 type stringReadWriter struct {
 	variable
 }
@@ -55,6 +57,6 @@ func (s *stringReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	return nil
 }
 
-func (s *stringReadWriter) vLength(v reflect.Value) (int, error) {
-	return 4 + v.Len(), nil
+func (s *stringReadWriter) vLength(v reflect.Value) int {
+	return 4 + v.Len()
 }

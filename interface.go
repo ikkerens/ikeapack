@@ -21,6 +21,8 @@ type Packer interface {
 	Pack(w io.Writer) error
 }
 
+var _ variableReadWriter = (*customReadWriter)(nil)
+
 type customReadWriter struct {
 	variable
 	fallback readWriter
@@ -46,10 +48,8 @@ func (c *customReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	return err
 }
 
-func (c *customReadWriter) vLength(v reflect.Value) (int, error) {
+func (c *customReadWriter) vLength(v reflect.Value) int {
 	var b bytes.Buffer
-	if err := c.writeVariable(&b, v); err != nil {
-		return 0, err
-	}
-	return b.Len(), nil
+	_ = c.writeVariable(&b, v)
+	return b.Len()
 }

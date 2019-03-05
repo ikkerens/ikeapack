@@ -10,6 +10,9 @@ func getPointerHandlerFromType(t reflect.Type) readWriter {
 	return &pointerWrapper{getTypeHandler(e), e}
 }
 
+var _ fixedReadWriter = (*pointerWrapper)(nil)
+var _ variableReadWriter = (*pointerWrapper)(nil)
+
 type pointerWrapper struct {
 	readWriter
 	typ reflect.Type
@@ -19,9 +22,9 @@ func (p *pointerWrapper) isFixed() bool {
 	return p.readWriter.isFixed()
 }
 
-func (p *pointerWrapper) vLength(v reflect.Value) (int, error) {
+func (p *pointerWrapper) vLength(v reflect.Value) int {
 	if v.IsNil() {
-		v = reflect.New(p.typ)
+		panic("Attempting to get Len of nil value")
 	}
 	return p.readWriter.(variableReadWriter).vLength(v.Elem())
 }
@@ -35,7 +38,7 @@ func (p *pointerWrapper) readVariable(r io.Reader, v reflect.Value) error {
 
 func (p *pointerWrapper) writeVariable(w io.Writer, v reflect.Value) error {
 	if v.IsNil() {
-		v.Set(reflect.New(p.typ))
+		panic("Attempting to marshal nil value")
 	}
 	return p.readWriter.(variableReadWriter).writeVariable(w, v.Elem())
 }
@@ -53,7 +56,7 @@ func (p *pointerWrapper) readFixed(b []byte, v reflect.Value) {
 
 func (p *pointerWrapper) writeFixed(b []byte, v reflect.Value) {
 	if v.IsNil() {
-		v.Set(reflect.New(p.typ))
+		panic("Attempting to marshal nil value")
 	}
 	p.readWriter.(fixedReadWriter).writeFixed(b, v.Elem())
 }

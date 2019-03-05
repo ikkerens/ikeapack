@@ -30,6 +30,8 @@ func getSliceHandlerFromType(t reflect.Type) readWriter {
 	return info
 }
 
+var _ variableReadWriter = (*sliceReadWriter)(nil)
+
 type sliceReadWriter struct {
 	variable
 	typ     reflect.Type
@@ -106,20 +108,17 @@ func (s *sliceReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	return nil
 }
 
-func (s *sliceReadWriter) vLength(v reflect.Value) (int, error) {
+func (s *sliceReadWriter) vLength(v reflect.Value) int {
 	if s.handler.isFixed() {
-		return 4 + (v.Len() * s.handler.(fixedReadWriter).length()), nil
+		return 4 + (v.Len() * s.handler.(fixedReadWriter).length())
 	}
 
 	// variable
 	size := 4
 	h := s.handler.(variableReadWriter)
 	for i := 0; i < v.Len(); i++ {
-		l, err := h.vLength(v.Index(i))
-		if err != nil {
-			return 0, err
-		}
+		l := h.vLength(v.Index(i))
 		size += l
 	}
-	return size, nil
+	return size
 }

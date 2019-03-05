@@ -32,6 +32,8 @@ func getMapHandlerFromType(t reflect.Type) readWriter {
 	return info
 }
 
+var _ variableReadWriter = (*mapReadWriter)(nil)
+
 type mapReadWriter struct {
 	variable
 
@@ -93,25 +95,19 @@ func (s *mapReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	return nil
 }
 
-func (s *mapReadWriter) vLength(v reflect.Value) (int, error) {
+func (s *mapReadWriter) vLength(v reflect.Value) int {
 	size := 4
 
 	for _, key := range v.MapKeys() {
 		val := v.MapIndex(key)
 
-		l, err := handleVariableLength(s.keyHandler, key)
-		if err != nil {
-			return 0, err
-		}
+		l := handleVariableLength(s.keyHandler, key)
 		size += l
 
-		l, err = handleVariableLength(s.valueHandler, val)
-		if err != nil {
-			return 0, err
-		}
+		l = handleVariableLength(s.valueHandler, val)
 
 		size += l
 	}
 
-	return size, nil
+	return size
 }

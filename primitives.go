@@ -6,6 +6,8 @@ import (
 	"reflect"
 )
 
+var _ fixedReadWriter = (*primitiveReadWriter)(nil)
+
 type primitiveReadWriter struct {
 	fixed
 

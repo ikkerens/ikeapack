@@ -28,7 +28,7 @@ func Pack(w io.Writer, data interface{}) error {
 }
 
 // Len will return the amount of bytes Pack will use.
-func Len(data interface{}) (int, error) {
+func Len(data interface{}) int {
 	v := reflect.Indirect(reflect.ValueOf(data))
 	h := getTypeHandler(v.Type())
 
