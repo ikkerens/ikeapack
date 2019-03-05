@@ -1,4 +1,4 @@
-package tests
+package ikea
 
 import (
 	"bytes"
@@ -9,15 +9,13 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-
-	"github.com/ikkerens/ikeapack"
 )
 
 /* Tests */
 
 func TestOutput(t *testing.T) {
 	buf := new(bytes.Buffer)
-	if err := ikea.Pack(buf, source); err != nil {
+	if err := Pack(buf, source); err != nil {
 		t.Error(err)
 		return
 	}
@@ -49,7 +47,7 @@ func TestOutput(t *testing.T) {
 	}
 	// Unpack it
 	var test map[string]string
-	if err := ikea.Unpack(buf, &test); err != nil {
+	if err := Unpack(buf, &test); err != nil {
 		fmt.Printf("Failing TestWrite, could not unpack map: %s\n", err.Error())
 		t.FailNow()
 	}
@@ -66,7 +64,7 @@ func TestCompleteRead(t *testing.T) {
 	buf.Write(testData)
 
 	tst := new(testStruct)
-	if err := ikea.Unpack(buf, tst); err != nil {
+	if err := Unpack(buf, tst); err != nil {
 		t.Error(err)
 		return
 	}
@@ -100,7 +98,7 @@ func TestCompleteRead(t *testing.T) {
 }
 
 func TestLen(t *testing.T) {
-	if l := ikea.Len(source); l != len(testData) {
+	if l := Len(source); l != len(testData) {
 		fmt.Printf("Failing TestLen, Len reported an incorrect value %d, should be %d", l, len(testData))
 		t.FailNow()
 	}
@@ -117,7 +115,7 @@ type testPackerOnly struct {
 }
 
 func (p *testPackerOnly) Pack(w io.Writer) error {
-	return ikea.Pack(w, &p.A)
+	return Pack(w, &p.A)
 }
 
 type testUnpackerOnly struct {
@@ -125,5 +123,5 @@ type testUnpackerOnly struct {
 }
 
 func (p *testUnpackerOnly) Unpack(r io.Reader) error {
-	return ikea.Unpack(r, &p.A)
+	return Unpack(r, &p.A)
 }

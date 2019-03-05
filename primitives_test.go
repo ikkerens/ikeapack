@@ -1,4 +1,4 @@
-package tests
+package ikea
 
 import (
 	"bytes"
@@ -7,8 +7,6 @@ import (
 	"os"
 	"reflect"
 	"testing"
-
-	"github.com/ikkerens/ikeapack"
 )
 
 func TestBool(t *testing.T) {
@@ -86,13 +84,13 @@ func TestString(t *testing.T) {
 func typeTest(t *testing.T, typ string, value, compare interface{}) {
 	var b bytes.Buffer
 
-	if err := ikea.Pack(&b, value); err != nil {
+	if err := Pack(&b, value); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Failing %s, could not write value: %s\n", typ, err.Error())
 		t.FailNow()
 	}
 
 	target := reflect.New(reflect.TypeOf(value).Elem())
-	if err := ikea.Unpack(&b, target.Interface()); err != nil {
+	if err := Unpack(&b, target.Interface()); err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Failing %s, could not read value: %s\n", typ, err.Error())
 		t.FailNow()
 	}

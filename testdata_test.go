@@ -1,10 +1,8 @@
-package tests
+package ikea
 
 import (
 	"encoding/hex"
 	"io"
-
-	"github.com/ikkerens/ikeapack"
 )
 
 /* Test types */
@@ -47,7 +45,7 @@ type testInterface struct {
 
 func (t *testInterface) Unpack(r io.Reader) error {
 	var temp int64
-	if err := ikea.Unpack(r, &temp); err != nil {
+	if err := Unpack(r, &temp); err != nil {
 		return err
 	}
 
@@ -57,7 +55,7 @@ func (t *testInterface) Unpack(r io.Reader) error {
 }
 
 func (t *testInterface) Pack(w io.Writer) error {
-	return ikea.Pack(w, t.A+10)
+	return Pack(w, t.A+10)
 }
 
 /* Test data */
