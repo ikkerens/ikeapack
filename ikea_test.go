@@ -65,6 +65,16 @@ func TestInt64(t *testing.T) {
 	typeTest(t, "TestInt64", &i, i)
 }
 
+func TestFloat32(t *testing.T) {
+	i := rand.Float32()
+	typeTest(t, "TestFloat32", &i, i)
+}
+
+func TestFloat64(t *testing.T) {
+	i := rand.Float64()
+	typeTest(t, "TestFloat32", &i, i)
+}
+
 func TestString(t *testing.T) {
 	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -164,6 +174,8 @@ func TestCompleteRead(t *testing.T) {
 	compare(t, "TestInt16", tst.TestInt16, source.TestInt16)
 	compare(t, "TestInt32", tst.TestInt32, source.TestInt32)
 	compare(t, "TestInt64", tst.TestInt64, source.TestInt64)
+	compare(t, "TestFloat32", tst.TestFloat32, source.TestFloat32)
+	compare(t, "TestFloat64", tst.TestFloat64, source.TestFloat64)
 	compare(t, "TestString", tst.TestString, source.TestString)
 	compare(t, "TestSubStruct", tst.TestSubStruct.A, source.TestSubStruct.A)
 	compare(t, "TestInterface", tst.TestInterface.A, source.TestInterface.A)
@@ -208,6 +220,8 @@ type testStruct struct {
 	TestInt16       int16
 	TestInt32       int32
 	TestInt64       int64
+	TestFloat32     float32
+	TestFloat64     float64
 	TestString      string
 	TestSubStruct   testSubStruct
 	TestInterface   testInterface
@@ -254,6 +268,8 @@ var source = &testStruct{
 	TestInt16:       0x1234,
 	TestInt32:       0x12345678,
 	TestInt64:       0x1234567812345678,
+	TestFloat32:     0.12345678,
+	TestFloat64:     0.12345678901234567890,
 	TestString:      "amazing serialization lib",
 	TestSubStruct:   testSubStruct{A: 0x42},
 	TestInterface:   testInterface{A: 0x24},
@@ -267,7 +283,7 @@ var source = &testStruct{
 		"anotherkey": "anothervalue",
 	},
 }
-var testData, _ = hex.DecodeString("011188161632323232646464646464646412123412345678123456781234567800000019616d617a696e672073657269616c697a6174696f6e206c696242000000000000002e660000000e49276d206120706f696e74657221000000640001081b407dd85802dbeb38c69dc23c1044dee55f51c1b63646ec3016a4e1d380ed2223f6a32f9ffa478aca0e5ab526b15e323367d48173b03f25680f1f9e9304f56f7611451992b78e1d697953fc7cd7153a4d5455565d7095d22ead5731418d1cf21800000024ecc0811000000803c021649147fe5079ecfe939d03000000000000000080021f0000ffff4242000000020000000a616e6f746865726b65790000000c616e6f7468657276616c7565000000066b65796e72310000000876616c75656e7231")
+var testData, _ = hex.DecodeString("01118816163232323264646464646464641212341234567812345678123456783dfcd6e93fbf9add3746f65f00000019616d617a696e672073657269616c697a6174696f6e206c696242000000000000002e660000000e49276d206120706f696e74657221000000640001081b407dd85802dbeb38c69dc23c1044dee55f51c1b63646ec3016a4e1d380ed2223f6a32f9ffa478aca0e5ab526b15e323367d48173b03f25680f1f9e9304f56f7611451992b78e1d697953fc7cd7153a4d5455565d7095d22ead5731418d1cf21800000024ecc0811000000803c021649147fe5079ecfe939d03000000000000000080021f0000ffff424200000002000000066b65796e72310000000876616c75656e72310000000a616e6f746865726b65790000000c616e6f7468657276616c7565")
 
 func init() {
 	for i := range source.TestSlice {
