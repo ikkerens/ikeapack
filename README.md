@@ -1,4 +1,4 @@
-# IkeaPack [![Build Status](https://travis-ci.org/ikkerens/ikeapack.svg?branch=master)](https://travis-ci.org/ikkerens/ikeapack) [![Go Report Card](https://goreportcard.com/badge/github.com/ikkerens/ikeapack)](https://goreportcard.com/report/github.com/ikkerens/ikeapack) [![GoDoc](https://godoc.org/github.com/ikkerens/ikeapack?status.svg)](https://godoc.org/github.com/ikkerens/ikeapack)
+# IkeaPack [![GoDoc](https://godoc.org/github.com/ikkerens/ikeapack?status.svg)](https://godoc.org/github.com/ikkerens/ikeapack) [![Build Status](https://travis-ci.org/ikkerens/ikeapack.svg?branch=master)](https://travis-ci.org/ikkerens/ikeapack) [![Go Report Card](https://goreportcard.com/badge/github.com/ikkerens/ikeapack)](https://goreportcard.com/report/github.com/ikkerens/ikeapack) [![codecov](https://codecov.io/gh/ikkerens/ikeapack/branch/master/graph/badge.svg)](https://codecov.io/gh/ikkerens/ikeapack)
 
 > Named IkeaPack because it compacts structs in a very compact and packed manner, and if you don't know how to reassemble it, it may just look like a random blob of parts. Just like ikea products!
 
