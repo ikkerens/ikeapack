@@ -32,6 +32,11 @@ Originally this package was made as an extension to binary.Read and binary.Write
 The types `int` and `uint` are not supported because their actual sizes depend on the compiler architecture.  
 Instead, be explicit and use int32/int64/uint32/uint64.
 
+#### Note about nil values
+This lib will initialize nil values when Unpacking/Unmarshalling, however it will panic if a nil value is attempted to be Packed/Serialized.
+This is due to the fact that there is no safe way to distinguish nil pointers from zero values.  
+Be safe, don't try to serialize nil values.
+
 ## Include in your project
 ```go
 import "github.com/ikkerens/ikeapack"
