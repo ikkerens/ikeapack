@@ -2,9 +2,7 @@ package ikea
 
 import (
 	"bytes"
-	"fmt"
 	"math/rand"
-	"os"
 	"reflect"
 	"testing"
 )
@@ -85,19 +83,18 @@ func typeTest(t *testing.T, typ string, value, compare interface{}) {
 	var b bytes.Buffer
 
 	if err := Pack(&b, value); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Failing %s, could not write value: %s\n", typ, err.Error())
-		t.FailNow()
+		t.Errorf("Failing %s, could not write value: %s\n", typ, err.Error())
+		return
 	}
 
 	target := reflect.New(reflect.TypeOf(value).Elem())
 	if err := Unpack(&b, target.Interface()); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Failing %s, could not read value: %s\n", typ, err.Error())
-		t.FailNow()
+		t.Errorf("Failing %s, could not read value: %s\n", typ, err.Error())
+		return
 	}
 
 	dereference := target.Elem().Interface()
 	if dereference != compare {
-		_, _ = fmt.Fprintf(os.Stderr, "Failing %s, %T value %+v does not match original %T %+v\n", typ, dereference, dereference, compare, compare)
-		t.FailNow()
+		t.Errorf("Failing %s, %T value %+v does not match original %T %+v\n", typ, dereference, dereference, compare, compare)
 	}
 }

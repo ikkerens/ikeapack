@@ -10,7 +10,7 @@ import (
 func TestReadPointer(t *testing.T) {
 	defer func() {
 		if recover() == nil {
-			t.FailNow()
+			t.Error("TestReadPointer should have panicked due to an invalid argument, it didn't")
 		}
 	}()
 
@@ -21,18 +21,18 @@ func TestReadPointer(t *testing.T) {
 func TestUseInt(t *testing.T) {
 	defer func() {
 		if recover() == nil {
-			t.FailNow()
+			t.Error("TestUseInt should have panicked due to an unsupported type, it didn't")
 		}
 	}()
 
 	var i int
-	_ = Unpack(nil, &i) // int is not supported
+	_ = Unpack(nil, &i)
 }
 
 func TestUseUint(t *testing.T) {
 	defer func() {
 		if recover() == nil {
-			t.FailNow()
+			t.Error("TestUseUint should have panicked due to an unsupported type, it didn't")
 		}
 	}()
 
@@ -43,7 +43,7 @@ func TestUseUint(t *testing.T) {
 func TestUnsupportedType(t *testing.T) {
 	defer func() {
 		if recover() == nil {
-			t.FailNow()
+			t.Error("TestUseUint should have panicked due to an unsupported type, it didn't")
 		}
 	}()
 
@@ -58,28 +58,28 @@ func TestVariableLengthOverflow(t *testing.T) {
 		Data struct{} `ikea:"compress:9"`
 	}
 	if err := Unpack(overflow, &t1); err == nil {
-		t.FailNow()
+		t.Error("TestVariableLengthOverflow: Data blobs may not have a length larger than math.MaxInt32")
 	}
 
 	overflow.Reset()
 	_ = Pack(overflow, uint32(math.MaxInt32+1))
 	var t2 map[string]struct{}
 	if err := Unpack(overflow, &t2); err == nil {
-		t.FailNow()
+		t.Error("TestVariableLengthOverflow: Data blobs may not have a length larger than math.MaxInt32")
 	}
 
 	overflow.Reset()
 	_ = Pack(overflow, uint32(math.MaxInt32+1))
 	var t3 []struct{}
 	if err := Unpack(overflow, &t3); err == nil {
-		t.FailNow()
+		t.Error("TestVariableLengthOverflow: Data blobs may not have a length larger than math.MaxInt32")
 	}
 
 	overflow.Reset()
 	_ = Pack(overflow, uint32(math.MaxInt32+1))
 	var t4 string
 	if err := Unpack(overflow, &t4); err == nil {
-		t.FailNow()
+		t.Error("TestVariableLengthOverflow: Data blobs may not have a length larger than math.MaxInt32")
 	}
 }
 
@@ -88,7 +88,7 @@ func TestCompressionInitError(t *testing.T) {
 		Data []byte `ikea:"compress:10"`
 	}{make([]byte, 10)}
 	if err := Pack(new(bytes.Buffer), &s1); err == nil {
-		t.Fail()
+		t.Error("TestCompressionInitError should have failed because of an illegal compression level")
 	}
 
 	s2 := struct {
@@ -96,7 +96,7 @@ func TestCompressionInitError(t *testing.T) {
 	}{make([]byte, 10)}
 	defer func() {
 		if recover() == nil {
-			t.FailNow()
+			t.Error("TestCompressionInitError should have failed because of an non-numerical compression level")
 		}
 	}()
 	_ = Pack(new(bytes.Buffer), &s2)
@@ -106,14 +106,14 @@ func TestInvalidUTF8(t *testing.T) {
 	var invalid string
 	b := bytes.NewBuffer([]byte{0x00, 0x00, 0x00, 0x01, 0xF1})
 	if Unpack(b, &invalid) == nil {
-		t.FailNow()
+		t.Error("TestInvalidUTF8 should have failed because of an invalid utf-8 string")
 	}
 }
 
-func TestPackFixedNil(t *testing.T) {
+func TestFixedNilPointerPacking(t *testing.T) {
 	defer func() {
 		if recover() == nil {
-			t.FailNow()
+			t.Error("TestFixedNilPointerPacking should panic because of an attempt to write an uninitialized variable, it didn't")
 		}
 	}()
 
@@ -123,10 +123,10 @@ func TestPackFixedNil(t *testing.T) {
 	_ = Pack(new(bytes.Buffer), &s)
 }
 
-func TestPackVariableNil(t *testing.T) {
+func TestVariableNilPointerPacking(t *testing.T) {
 	defer func() {
 		if recover() == nil {
-			t.FailNow()
+			t.Error("TestVariableNilPointerPacking should panic because of an attempt to write an uninitialized variable, it didn't")
 		}
 	}()
 
@@ -136,17 +136,17 @@ func TestPackVariableNil(t *testing.T) {
 	_ = Pack(new(bytes.Buffer), &s)
 }
 
-func TestLenFixedNil(t *testing.T) {
+func TestFixedNilPointerLength(t *testing.T) {
 	s := struct {
 		A *uint32
 	}{}
 	Len(&s) // Unlike all other nil values, this should succeed
 }
 
-func TestLenVariableNil(t *testing.T) {
+func TestVariableNilPointerLength(t *testing.T) {
 	defer func() {
 		if recover() == nil {
-			t.FailNow()
+			t.Error("TestVariableNilPointerLength should panic because of an attempt to write an uninitialized variable, it didn't")
 		}
 	}()
 
@@ -165,7 +165,8 @@ func TestReadErrors(t *testing.T) {
 	for err != nil {
 		err = Unpack(e, tst)
 		if err == nil && e.pass != len(testData) {
-			t.FailNow()
+			t.Error("TestReadErrors should have failed because of simulated IO errors, it didn't")
+			return
 		}
 		e.Reset()
 	}
@@ -179,7 +180,8 @@ func TestWriteErrors(t *testing.T) {
 	for err != nil {
 		err = Pack(e, source)
 		if err == nil && e.pass != len(testData) {
-			t.FailNow()
+			t.Error("TestWriteErrors should have failed because of simulated IO errors, it didn't")
+			return
 		}
 		e.Reset()
 	}

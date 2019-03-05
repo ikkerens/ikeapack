@@ -3,7 +3,6 @@ package ikea
 import (
 	"bytes"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"reflect"
 	"strconv"
@@ -22,8 +21,8 @@ func TestOutput(t *testing.T) {
 
 	result := buf.Bytes()
 	if len(result) != len(testData) {
-		fmt.Printf("Failing TestWrite, result \"%s\" length (%d) does not match test data length (%d)\n", hex.EncodeToString(result), len(result), len(testData))
-		t.FailNow()
+		t.Errorf("Failing TestWrite, result \"%s\" length (%d) does not match test data length (%d)\n", hex.EncodeToString(result), len(result), len(testData))
+		return
 	}
 
 	// In struct creation we've added 0x4242 padding to we can split out the map.
@@ -33,29 +32,28 @@ func TestOutput(t *testing.T) {
 	resultParts := strings.Split(hex.EncodeToString(result), "4242")
 
 	if originalParts[0] != resultParts[0] {
-		fmt.Printf("Failing TestWrite, hex output \"%s\" does not match test data slice\n", hex.EncodeToString(result))
-		t.FailNow()
+		t.Errorf("Failing TestWrite, hex output \"%s\" does not match test data slice\n", hex.EncodeToString(result))
+		return
 	}
 
 	// Instead, we treat the map a bit differently, we put it back into a buffer
 	buf.Reset()
 	if data, err := hex.DecodeString(resultParts[1]); err != nil {
-		fmt.Printf("Failing TestWrite, hex output \"%s\" is not a valid hex string: %s\n", resultParts[1], err.Error())
-		t.FailNow()
+		t.Errorf("Failing TestWrite, hex output \"%s\" is not a valid hex string: %s\n", resultParts[1], err.Error())
+		return
 	} else {
 		buf.Write(data)
 	}
 	// Unpack it
 	var test map[string]string
 	if err := Unpack(buf, &test); err != nil {
-		fmt.Printf("Failing TestWrite, could not unpack map: %s\n", err.Error())
-		t.FailNow()
+		t.Errorf("Failing TestWrite, could not unpack map: %s\n", err.Error())
+		return
 	}
 
 	// And then compare it using DeepEqual
 	if !reflect.DeepEqual(source.TestMap, test) {
-		fmt.Printf("Failing TestWrite, resulting map is not equal\n")
-		t.FailNow()
+		t.Errorf("Failing TestWrite, resulting map is not equal\n")
 	}
 }
 
@@ -99,8 +97,7 @@ func TestCompleteRead(t *testing.T) {
 
 func TestLen(t *testing.T) {
 	if l := Len(source); l != len(testData) {
-		fmt.Printf("Failing TestLen, Len reported an incorrect value %d, should be %d", l, len(testData))
-		t.FailNow()
+		t.Errorf("Failing TestLen, Len reported an incorrect value %d, should be %d", l, len(testData))
 	}
 }
 
