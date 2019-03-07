@@ -38,12 +38,13 @@ func TestOutput(t *testing.T) {
 
 	// Instead, we treat the map a bit differently, we put it back into a buffer
 	buf.Reset()
-	if data, err := hex.DecodeString(resultParts[1]); err != nil {
+	data, err := hex.DecodeString(resultParts[1])
+	if err != nil {
 		t.Errorf("Failing TestWrite, hex output \"%s\" is not a valid hex string: %s\n", resultParts[1], err.Error())
 		return
-	} else {
-		buf.Write(data)
 	}
+	buf.Write(data)
+
 	// Unpack it
 	var test map[string]string
 	if err := Unpack(buf, &test); err != nil {
