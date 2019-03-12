@@ -97,7 +97,6 @@ func scanStruct(t reflect.Type) readWriter {
 	return &variableStructReadWriter{handlers: handlers}
 }
 
-// var _ fixedReadWriter = (*structWrapper)(nil)
 var _ variableReadWriter = (*structWrapper)(nil)
 
 type structWrapper struct {
@@ -117,19 +116,6 @@ func (s *structWrapper) readVariable(r io.Reader, v reflect.Value) error {
 func (s *structWrapper) writeVariable(w io.Writer, v reflect.Value) error {
 	return s.r.(variableReadWriter).writeVariable(w, v)
 }
-
-/*
-func (s *structWrapper) length() int {
-	return s.readWriter.(fixedReadWriter).length()
-}
-
-func (s *structWrapper) readFixed(b []byte, v reflect.Value) {
-	s.readWriter.(fixedReadWriter).readFixed(b, v)
-}
-
-func (s *structWrapper) writeFixed(b []byte, v reflect.Value) {
-	s.readWriter.(fixedReadWriter).writeFixed(b, v)
-}*/
 
 var _ fixedReadWriter = (*fixedStructReadWriter)(nil)
 
