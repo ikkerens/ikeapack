@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"unicode"
 )
 
 var (
@@ -61,9 +62,20 @@ func scanStruct(t reflect.Type) readWriter {
 		typ := field.Type
 		h := getTypeHandler(typ)
 
+		r := rune(field.Name[0])
+		if unicode.ToLower(r) == r {
+			handlers = append(handlers, nil)
+			continue // Ignore, unexported
+		}
+
 		tag, ok := field.Tag.Lookup("ikea")
 		if !ok {
 			tag = ""
+		}
+
+		if tag == "-" {
+			handlers = append(handlers, nil)
+			continue // Ignore, ignored
 		}
 
 		if h.isFixed() && length != -1 {
@@ -133,6 +145,9 @@ func (s *fixedStructReadWriter) length() int {
 func (s *fixedStructReadWriter) readFixed(data []byte, v reflect.Value) {
 	read := 0
 	for i, handler := range s.handlers {
+		if handler == nil {
+			continue
+		}
 		r := handler.(fixedReadWriter)
 		r.readFixed(data[read:read+r.length()], v.Field(i))
 		read += r.length()
@@ -142,6 +157,9 @@ func (s *fixedStructReadWriter) readFixed(data []byte, v reflect.Value) {
 func (s *fixedStructReadWriter) writeFixed(data []byte, v reflect.Value) {
 	written := 0
 	for i, handler := range s.handlers {
+		if handler == nil {
+			continue
+		}
 		w := handler.(fixedReadWriter)
 		w.writeFixed(data[written:written+w.length()], v.Field(i))
 		written += w.length()
@@ -158,6 +176,9 @@ type variableStructReadWriter struct {
 
 func (h *variableStructReadWriter) readVariable(r io.Reader, v reflect.Value) error {
 	for i, handler := range h.handlers {
+		if handler == nil {
+			continue
+		}
 		if err := handleVariableReader(r, handler, v.Field(i)); err != nil {
 			return err
 		}
@@ -168,6 +189,9 @@ func (h *variableStructReadWriter) readVariable(r io.Reader, v reflect.Value) er
 
 func (h *variableStructReadWriter) writeVariable(w io.Writer, v reflect.Value) error {
 	for i, handler := range h.handlers {
+		if handler == nil {
+			continue
+		}
 		if err := handleVariableWriter(w, handler, v.Field(i)); err != nil {
 			return err
 		}
@@ -180,6 +204,9 @@ func (h *variableStructReadWriter) vLength(v reflect.Value) int {
 	size := 0
 
 	for i, handler := range h.handlers {
+		if handler == nil {
+			continue
+		}
 		size += handleVariableLength(handler, v.Field(i))
 	}
 

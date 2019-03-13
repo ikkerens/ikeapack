@@ -109,7 +109,8 @@ func compare(t *testing.T, field string, value1, value2 interface{}) {
 }
 
 type testPackerOnly struct {
-	A uint8
+	A       uint8
+	Ignored uint8 `ikea:"-"`
 }
 
 func (p *testPackerOnly) Pack(w io.Writer) error {
@@ -117,7 +118,8 @@ func (p *testPackerOnly) Pack(w io.Writer) error {
 }
 
 type testUnpackerOnly struct {
-	A uint8
+	A       uint8
+	Ignored uint8 `ikea:"-"`
 }
 
 func (p *testUnpackerOnly) Unpack(r io.Reader) error {
