@@ -31,8 +31,9 @@ type testStruct struct {
 	TestVariableSlice      []string
 	TestCompression        []byte `ikea:"compress:9"`
 	testUnexportedVariable string
-	TestIgnored            string `ikea:"-"`
-	Padding                uint16 // Maps randomise iteration order, we can't verify this string, so we split using this
+	TestIgnored            string        `ikea:"-"`
+	TestUnsupportedIgnored chan struct{} `ikea:"-"`
+	Padding                uint16        // Maps randomise iteration order, we can't verify this string, so we split using this
 	TestMap                map[string]string
 }
 
@@ -86,6 +87,7 @@ var source = &testStruct{
 	TestCompression:        make([]byte, 10000),
 	testUnexportedVariable: "I'm not exported!",
 	TestIgnored:            "I'm ignored!",
+	TestUnsupportedIgnored: make(chan struct{}, 1),
 	Padding:                0x4242,
 	TestMap: map[string]string{
 		"keynr1":     "valuenr1",

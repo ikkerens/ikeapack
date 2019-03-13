@@ -59,8 +59,6 @@ func scanStruct(t reflect.Type) readWriter {
 	length := 0
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
-		typ := field.Type
-		h := getTypeHandler(typ)
 
 		r := rune(field.Name[0])
 		if unicode.ToLower(r) == r {
@@ -78,6 +76,7 @@ func scanStruct(t reflect.Type) readWriter {
 			continue // Ignore, ignored
 		}
 
+		h := getTypeHandler(field.Type)
 		if h.isFixed() && length != -1 {
 			length += h.(fixedReadWriter).length()
 		} else {
