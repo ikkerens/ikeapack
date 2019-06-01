@@ -23,26 +23,25 @@ import (
 //	return Pack(h.buffer, h)
 //}
 
-type HolderSmall struct {
-	vals [10][10]uint16
-	buffer    *bytes.Buffer `ikea:"-"`
+type arr2dHolderSmall struct {
+	vals   [10][10]uint16
+	buffer *bytes.Buffer `ikea:"-"`
 }
 
-func (h *HolderSmall) Init() {
+func (h *arr2dHolderSmall) Init() {
 	h.buffer = new(bytes.Buffer)
 }
 
-func (h *HolderSmall) compress() error {
+func (h *arr2dHolderSmall) compress() error {
 	return Pack(h.buffer, h)
 }
 
-
 // var _holderL HolderLarge
-var _holderS HolderSmall
+var _arr2dHolderS arr2dHolderSmall
 
 func init() {
 	//_holderL.Init()
-	_holderS.Init()
+	_arr2dHolderS.Init()
 
 	//for i := range _holderL.vals {
 	//	for j := range _holderL.vals[i] {
@@ -51,10 +50,10 @@ func init() {
 	//	}
 	//}
 
-	for i := range _holderS.vals {
-		for j := range _holderS.vals[i] {
+	for i := range _arr2dHolderS.vals {
+		for j := range _arr2dHolderS.vals[i] {
 			v := rand.Uint32()
-			_holderS.vals[i][j] = uint16(v)
+			_arr2dHolderS.vals[i][j] = uint16(v)
 		}
 	}
 }
@@ -81,20 +80,20 @@ func init() {
 //}
 
 func TestSmall2DArrayPackingAndUnpacking(t *testing.T) {
-	if err := _holderS.compress(); err != nil {
+	if err := _arr2dHolderS.compress(); err != nil {
 		t.Fatal(err)
 	}
 
-	h2 := HolderSmall{}
+	h2 := arr2dHolderSmall{}
 	h2.Init()
-	err := Unpack(_holderS.buffer, &h2)
+	err := Unpack(_arr2dHolderS.buffer, &h2)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	for i := range _holderS.vals {
-		for j := range _holderS.vals[i] {
-			if _holderS.vals[i][j] != h2.vals[i][j] {
+	for i := range _arr2dHolderS.vals {
+		for j := range _arr2dHolderS.vals[i] {
+			if _arr2dHolderS.vals[i][j] != h2.vals[i][j] {
 				t.Fatal(fmt.Sprintf("diff values. At vals[%d][%d]", i, j))
 			}
 		}
