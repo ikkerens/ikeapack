@@ -7,49 +7,93 @@ import (
 	"testing"
 )
 
-type Holder struct {
+// Causes error: too much data in section SBSS / SNOPTRBSS
+type HolderLarge struct {
 	vals [50000000][10]uint16
 	buffer    *bytes.Buffer `ikea:"-"`
 }
 
-func (h *Holder) Init() {
+func (h *HolderLarge) Init() {
 	h.buffer = new(bytes.Buffer)
 }
 
-func (h *Holder) compress() error {
+func (h *HolderLarge) compress() error {
+	return Pack(h.buffer, h)
+}
+
+type HolderSmall struct {
+	vals [10][10]uint16
+	buffer    *bytes.Buffer `ikea:"-"`
+}
+
+func (h *HolderSmall) Init() {
+	h.buffer = new(bytes.Buffer)
+}
+
+func (h *HolderSmall) compress() error {
 	return Pack(h.buffer, h)
 }
 
 
-var _holder Holder
+var _holderL HolderLarge
+var _holderS HolderLarge
 
 func init() {
-	_holder.Init()
+	_holderL.Init()
+	_holderS.Init()
 
-	for i := range _holder.vals {
-		for j := range _holder.vals[i] {
+	for i := range _holderL.vals {
+		for j := range _holderL.vals[i] {
 			v := rand.Uint32()
-			_holder.vals[i][j] = uint16(v)
+			_holderL.vals[i][j] = uint16(v)
+		}
+	}
+
+	for i := range _holderS.vals {
+		for j := range _holderS.vals[i] {
+			v := rand.Uint32()
+			_holderS.vals[i][j] = uint16(v)
 		}
 	}
 }
 
-func Test2DArrayPackingAndUnpacking(t *testing.T) {
-	if err := _holder.compress(); err != nil {
-		panic(err)
+func TestLarge2DArrayPackingAndUnpacking(t *testing.T) {
+	if err := _holderL.compress(); err != nil {
+		t.Fatal(err)
 	}
 
-	h2 := Holder{}
+	h2 := HolderLarge{}
 	h2.Init()
-	err := Unpack(_holder.buffer, &h2)
+	err := Unpack(_holderL.buffer, &h2)
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
-	for i := range _holder.vals {
-		for j := range _holder.vals[i] {
-			if _holder.vals[i][j] != h2.vals[i][j] {
-				panic(fmt.Sprintf("diff values. At vals[%d][%d]", i, j))
+	for i := range _holderL.vals {
+		for j := range _holderL.vals[i] {
+			if _holderL.vals[i][j] != h2.vals[i][j] {
+				t.Fatal(fmt.Sprintf("diff values. At vals[%d][%d]", i, j))
+			}
+		}
+	}
+}
+
+func TestSmall2DArrayPackingAndUnpacking(t *testing.T) {
+	if err := _holderS.compress(); err != nil {
+		t.Fatal(err)
+	}
+
+	h2 := HolderSmall{}
+	h2.Init()
+	err := Unpack(_holderS.buffer, &h2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for i := range _holderS.vals {
+		for j := range _holderS.vals[i] {
+			if _holderS.vals[i][j] != h2.vals[i][j] {
+				t.Fatal(fmt.Sprintf("diff values. At vals[%d][%d]", i, j))
 			}
 		}
 	}
